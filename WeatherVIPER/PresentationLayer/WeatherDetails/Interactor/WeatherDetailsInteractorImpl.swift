@@ -12,8 +12,14 @@ final class WeatherDetailsInteractorImpl: WeatherDetailsInteractor {
     
     weak var presenter: WeatherDetailsPresenterOutput?
     private let router: WeatherDetailsRouter
+    private let city: WeatherListItem
     
-    init(router: WeatherDetailsRouter) {
+    init(city: WeatherListItem, router: WeatherDetailsRouter) {
+        self.city = city
         self.router = router
+    }
+    
+    func setupDataSource() {
+        presenter?.didGetWeather(city: city)
     }
 }

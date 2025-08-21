@@ -8,5 +8,5 @@
 import UIKit
 
 final class WeatherDetailsRouterImpl: WeatherDetailsRouter {
-    
+    weak var viewController: UIViewController?
 }

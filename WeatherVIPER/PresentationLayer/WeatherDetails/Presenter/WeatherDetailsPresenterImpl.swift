@@ -15,4 +15,15 @@ final class WeatherDetailsPresenterImpl: WeatherDetailsPresenter {
     init(interactor: WeatherDetailsInteractor) {
         self.interactor = interactor
     }
+    
+    func setupDataSource() {
+        interactor.setupDataSource()
+    }
+}
+
+extension WeatherDetailsPresenterImpl: WeatherDetailsPresenterOutput {
+    
+    func didGetWeather(city: WeatherListItem) {
+        view?.didGetWeather(city: city)
+    }
 }

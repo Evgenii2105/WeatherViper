@@ -8,5 +8,5 @@
 import Foundation
 
 protocol WeatherDetailsInteractor: AnyObject {
-    
+    func setupDataSource()
 }

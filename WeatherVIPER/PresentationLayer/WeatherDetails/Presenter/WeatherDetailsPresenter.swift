@@ -8,9 +8,9 @@
 import Foundation
 
 protocol WeatherDetailsPresenter: AnyObject {
-    
+    func setupDataSource()
 }
 
 protocol WeatherDetailsPresenterOutput: AnyObject {
-    
+    func didGetWeather(city: WeatherListItem)
 }

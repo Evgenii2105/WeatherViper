@@ -8,5 +8,5 @@
 import Foundation
 
 protocol WeatherDetailsView: AnyObject {
-    
+    func didGetWeather(city: WeatherListItem)
 }

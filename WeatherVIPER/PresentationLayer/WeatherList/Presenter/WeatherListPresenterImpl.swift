@@ -8,7 +8,7 @@
 import UIKit
 
 final class WeatherListPresenterImpl: WeatherListPresenter {
-    
+  
     weak var view: WeatherListView?
     private let interactor: WeatherListInteractor
     
@@ -19,8 +19,31 @@ final class WeatherListPresenterImpl: WeatherListPresenter {
     func searchCity(_ text: String) {
         interactor.searchCity(text)
     }
+    
+    func setupDataSource() {
+        interactor.setupDataSource()
+    }
+    
+    func showDetailsCityWeather(city: WeatherListItem) {
+        interactor.showDetailsCityWeather(city: city)
+    }
+    
+    func showMap() {
+        interactor.showMap()
+    }
 }
 
 extension WeatherListPresenterImpl: WeatherListPresenterOutput {
+   
+    func didCityWeather(city: [WeatherListItem]) {
+        view?.didCityWeather(city: city)
+    }
     
+    func hideLoadingIndicator() {
+        view?.hideLoadingIndicator()
+    }
+    
+    func showLoadingIndicator() {
+        view?.showLoadingIndicator()
+    }
 }

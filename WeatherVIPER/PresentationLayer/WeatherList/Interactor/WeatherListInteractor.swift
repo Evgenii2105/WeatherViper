@@ -9,4 +9,7 @@ import Foundation
 
 protocol WeatherListInteractor: AnyObject {
     func searchCity(_ text: String)
+    func setupDataSource()
+    func showDetailsCityWeather(city: WeatherListItem)
+    func showMap()
 }
