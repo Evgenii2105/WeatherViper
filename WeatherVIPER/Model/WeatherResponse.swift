@@ -66,3 +66,25 @@ struct Coord: Decodable {
         self.lat = try container.decode(Double.self, forKey: .lat)
     }
 }
+
+struct DecoderCoord: Decodable {
+    let name: String
+    let lat: Double
+    let lon: Double
+    let country: String
+    
+    enum CodingKeys: String, CodingKey {
+        case name = "name"
+        case lat = "lat"
+        case lon = "lon"
+        case country = "country"
+    }
+    
+    init(from decoder: any Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        self.name = try container.decode(String.self, forKey: .name)
+        self.lat = try container.decode(Double.self, forKey: .lat)
+        self.lon = try container.decode(Double.self, forKey: .lon)
+        self.country = try container.decode(String.self, forKey: .country)
+    }
+}

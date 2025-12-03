@@ -7,7 +7,7 @@
 
 import Foundation
 
-struct WeatherListItem {
+struct WeatherListItem: Hashable {
     let id: Int
     let name: String
     let currentTemp: Double
@@ -15,6 +15,7 @@ struct WeatherListItem {
     let maxTemp: Double
     let precipitation: String
     let weatherImage: URL?
+    let isFavorites: Bool
 }
 
 extension WeatherResponse {
@@ -27,7 +28,12 @@ extension WeatherResponse {
             minTemp: self.main.tempMIN,
             maxTemp: self.main.tempMAX,
             precipitation: self.weather.first?.description ?? "",
-            weatherImage: self.weather.first?.iconURL
+            weatherImage: self.weather.first?.iconURL,
+            isFavorites: false
         )
     }
+}
+
+struct SearchResult {
+    let name: String
 }

@@ -11,4 +11,5 @@ protocol WeatherListView: AnyObject {
     func didCityWeather(city: [WeatherListItem])
     func hideLoadingIndicator()
     func showLoadingIndicator()
+    func didUpdateSearchResults(_ cities: [String], countries: [String])
 }

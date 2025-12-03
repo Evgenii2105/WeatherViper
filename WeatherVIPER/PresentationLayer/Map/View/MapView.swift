@@ -9,4 +9,5 @@ import MapKit
 
 protocol MapView: AnyObject {
     func addPointAnnotation(_ annotation: MKAnnotation)
+    func didGetCurrentInfo(city: WeatherListItem)
 }

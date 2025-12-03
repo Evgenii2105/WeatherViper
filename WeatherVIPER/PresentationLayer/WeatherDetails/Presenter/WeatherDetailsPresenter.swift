@@ -8,9 +8,11 @@
 import Foundation
 
 protocol WeatherDetailsPresenter: AnyObject {
-    func setupDataSource()
+    func setupDataSource(state layout: WeatherDetailsViewController.StateLayout)
 }
 
 protocol WeatherDetailsPresenterOutput: AnyObject {
     func didGetWeather(city: WeatherListItem)
+    func didGetWeatherFiveDays(weather: [WeatherFiveDaysItem])
+    func didGetWeatherMakeLayout(_ weather: [WeatherFiveDaysItem])
 }

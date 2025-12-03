@@ -16,8 +16,8 @@ final class WeatherDetailsPresenterImpl: WeatherDetailsPresenter {
         self.interactor = interactor
     }
     
-    func setupDataSource() {
-        interactor.setupDataSource()
+    func setupDataSource(state layout: WeatherDetailsViewController.StateLayout) {
+        interactor.setupDataSource(state: layout)
     }
 }
 
@@ -25,5 +25,13 @@ extension WeatherDetailsPresenterImpl: WeatherDetailsPresenterOutput {
     
     func didGetWeather(city: WeatherListItem) {
         view?.didGetWeather(city: city)
+    }
+    
+    func didGetWeatherFiveDays(weather: [WeatherFiveDaysItem]) {
+        view?.didGetWeatherFiveDays(weather: weather)
+    }
+    
+    func didGetWeatherMakeLayout(_ weather: [WeatherFiveDaysItem]) {
+        view?.updateUI { weather }
     }
 }

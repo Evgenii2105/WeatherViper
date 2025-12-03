@@ -24,9 +24,15 @@ final class MapPresenterImpl: MapPresenter {
     func dismissModule() {
         interactor.dismissModule()
     }
+    
+    func getCurrentInfoCity(_ coordinates: CLLocationCoordinate2D) {
+        interactor.getCurrentInfoCity(coordinates)
+    }
 }
 
 extension MapPresenterImpl: MapPresenterOutput {
     
-
+    func didGetInfoCurrentCity(city: WeatherListItem) {
+        view?.didGetCurrentInfo(city: city)
+    }
 }

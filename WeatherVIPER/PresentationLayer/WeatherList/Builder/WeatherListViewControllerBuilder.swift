@@ -12,9 +12,11 @@ final class WeatherListViewControllerBuilder {
     static func build() -> UIViewController {
         let view = WeatherListViewController()
         let router = WeatherListRouterImpl()
+        let citiesStorage = CityStorageImpl()
         let alert = AlertFactoryServiceImpl()
         let interactor = WeatherListInteractorImpl(
             alertFactory: alert,
+            citiesStorage: citiesStorage,
             router: router
         )
         let presenter = WeatherListPresenterImpl(interactor: interactor)

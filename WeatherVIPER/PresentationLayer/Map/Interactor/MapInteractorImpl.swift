@@ -14,13 +14,23 @@ protocol MapListener: AnyObject {
 
 final class MapInteractorImpl: MapInteractor {
     
+    enum Section {
+        case main
+    }
+    
     weak var presenter: MapPresenterOutput?
     private let router: MapRouter
     weak var listener: MapListener?
+    private let dataManager: DataManagerService
     
-    init(router: MapRouter, listener: MapListener? = nil) {
+    init(
+        dataManager: DataManagerServiceImpl,
+        router: MapRouter,
+        listener: MapListener? = nil
+    ) {
         self.router = router
         self.listener = listener
+        self.dataManager = dataManager
     }
     
     func handleMapTap(with coordinates: CLLocationCoordinate2D) {
@@ -29,5 +39,22 @@ final class MapInteractorImpl: MapInteractor {
     
     func dismissModule() {
         router.dismissModule()
+    }
+    
+    func getCurrentInfoCity(_ coordinates: CLLocationCoordinate2D) {
+        dataManager.getCurrentCity(
+            coordinate: coordinates) { [weak self] result in
+                guard let self else { return }
+                switch result {
+                case .success(let currentCityInfo):
+                    for city in currentCityInfo {
+                        DispatchQueue.main.async {
+                            self.presenter?.didGetInfoCurrentCity(city: city)
+                        }
+                    }
+                case .failure(let error):
+                    print("\(error.localizedDescription)")
+                }
+            }
     }
 }

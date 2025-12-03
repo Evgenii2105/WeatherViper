@@ -14,3 +14,9 @@ extension UIView {
         NSLayoutConstraint.activate(constraints)
     }
 }
+
+//extension UICollectionReusableView {
+//    static var reuseIdentifier: String {
+//        return String(describing: Self.self)
+//    }
+//}

@@ -16,8 +16,14 @@ final class WeatherListPresenterImpl: WeatherListPresenter {
         self.interactor = interactor
     }
     
-    func searchCity(_ text: String) {
-        interactor.searchCity(text)
+    func search(city: String) {
+        print("в презентер передали поиск по городу \(city)")
+        interactor.search(city: city)
+    }
+    
+    func searchCities(for query: String) {
+        print("Поиск городов для подсказок: \(query)")
+        interactor.searchCities(for: query)
     }
     
     func setupDataSource() {
@@ -30,6 +36,10 @@ final class WeatherListPresenterImpl: WeatherListPresenter {
     
     func showMap() {
         interactor.showMap()
+    }
+    
+    func remove(at index: Int) {
+        interactor.remove(at: index)
     }
 }
 
@@ -45,5 +55,9 @@ extension WeatherListPresenterImpl: WeatherListPresenterOutput {
     
     func showLoadingIndicator() {
         view?.showLoadingIndicator()
+    }
+    
+    func didUpdateSearchResults(_ cities: [String], countries: [String]) {
+        view?.didUpdateSearchResults(cities, countries: countries)
     }
 }

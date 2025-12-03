@@ -13,9 +13,27 @@ class WeatherListViewController: UIViewController {
     
     var presenter: WeatherListPresenter?
     
+    typealias DataSource = UICollectionViewDiffableDataSource<WeatherListInteractorImpl.ListSection, WeatherListItem>
+    typealias Snapshot = NSDiffableDataSourceSnapshot<WeatherListInteractorImpl.ListSection, WeatherListItem>
+    
     // MARK: Private Properties
     
-    private let searchController = UISearchController(searchResultsController: nil)
+    private lazy var dataSource: DataSource = {
+        let data = DataSource(
+            collectionView: cityListCollection) { collectionView, indexPath, itemIdentifier in
+                guard let cell = collectionView.dequeueReusableCell(
+                    withReuseIdentifier: WeatherListCollectionCell.cellIdentifier,
+                    for: indexPath
+                ) as? WeatherListCollectionCell else {
+                    return UICollectionViewCell()
+                }
+                cell.configure(city: itemIdentifier)
+                return cell
+            }
+        return data
+    }()
+    
+    private let searchController: UISearchController
     
     private var cities: [WeatherListItem] = []
     
@@ -38,9 +56,11 @@ class WeatherListViewController: UIViewController {
     private lazy var addCitiesBarButton: UIBarButtonItem = {
         return UIBarButtonItem(
             systemItem: .add,
-            primaryAction: UIAction(handler: { [weak self] _ in
-                self?.showMap()
-            })
+            primaryAction: UIAction(
+                handler: { [weak self] _ in
+                    self?.presenter?.showMap()
+                }
+            )
         )
     }()
     
@@ -53,19 +73,51 @@ class WeatherListViewController: UIViewController {
         return stack
     }()
     
-    private let cityTable: UITableView = {
-        let cityTable = UITableView()
-        cityTable.backgroundColor = .white
-        return cityTable
+    private lazy var cityListCollection: UICollectionView = {
+        let collection = UICollectionView(
+            frame: .zero,
+            collectionViewLayout: createLayout()
+        )
+        
+        collection.register(
+            WeatherListCollectionCell.self,
+            forCellWithReuseIdentifier: WeatherListCollectionCell.cellIdentifier
+        )
+        collection.backgroundColor = Colors.CitiesWeatherListBackground
+        return collection
     }()
+    
+//    private let cityTable: UITableView = {
+//        let cityTable = UITableView()
+//        cityTable.backgroundColor = Colors.CitiesWeatherListBackground
+//        return cityTable
+//    }()
+    
+    init() {
+        let resultController = SearchResultsViewController()
+        self.searchController = UISearchController(searchResultsController: resultController)
+        
+        super.init(nibName: nil, bundle: nil)
+        resultController.delegate = self
+    }
+    
+    required init?(coder: NSCoder) {
+        fatalError("init(coder:) has not been implemented")
+    }
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        print(#function, "list")
         setupSearchController()
         setupUI()
         setupConstraints()
-        createWeatherListTable()
+       // createWeatherListTable()
         presenter?.setupDataSource()
+    }
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        cityListCollection.frame = view.bounds
     }
 }
 
@@ -74,87 +126,81 @@ class WeatherListViewController: UIViewController {
 private extension WeatherListViewController {
     
     func setupUI() {
-        view.backgroundColor = .white
+        view.backgroundColor = Colors.CitiesWeatherListBackground
         self.title = "Мои города"
         navigationItem.rightBarButtonItem = addCitiesBarButton
-        view.addSubview(cityTable)
+        view.addSubview(cityListCollection)
+        // view.addSubview(cityTable)
         view.addSubview(loadingStackView)
     }
     
     func setupConstraints() {
-        loadingStackView.addConstraints(constraints: [
-            loadingStackView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
-            loadingStackView.centerXAnchor.constraint(equalTo: view.centerXAnchor)
-        ])
+        loadingStackView.addConstraints(
+            constraints: [
+                loadingStackView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+                loadingStackView.centerXAnchor.constraint(equalTo: view.centerXAnchor)
+            ]
+        )
         
-        cityTable.addConstraints(constraints: [
-            cityTable.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
-            cityTable.leadingAnchor.constraint(equalTo: view.leadingAnchor),
-            cityTable.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
-            cityTable.trailingAnchor.constraint(equalTo: view.trailingAnchor)
-        ])
+//        cityTable.addConstraints(
+//            constraints: [
+//                cityTable.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
+//                cityTable.leadingAnchor.constraint(equalTo: view.leadingAnchor),
+//                cityTable.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
+//                cityTable.trailingAnchor.constraint(equalTo: view.trailingAnchor)
+//            ]
+//        )
     }
     
     func setupSearchController() {
         searchController.searchResultsUpdater = self
         searchController.obscuresBackgroundDuringPresentation = false
-        searchController.hidesNavigationBarDuringPresentation = false
-        searchController.searchBar.placeholder = "Search City"
+        searchController.searchBar.placeholder = "Поиск города"
         searchController.searchBar.tintColor = .lightGray
         
+        definesPresentationContext = true
+        searchController.modalPresentationStyle = .fullScreen
+        searchController.modalTransitionStyle = .coverVertical
+        
         self.navigationItem.searchController = searchController
-        self.definesPresentationContext = false
         self.navigationItem.hidesSearchBarWhenScrolling = false
     }
     
-    func createWeatherListTable() {
-        cityTable.register(WeatherListCell.self, forCellReuseIdentifier: WeatherListCell.cellIdentifier)
-        cityTable.dataSource = self
-        cityTable.delegate = self
-        cityTable.separatorStyle = .none
-    }
+//    func createWeatherListTable() {
+//        cityTable.register(WeatherListCell.self, forCellReuseIdentifier: WeatherListCell.cellIdentifier)
+//        cityTable.dataSource = self
+//        cityTable.delegate = self
+//        cityTable.separatorStyle = .singleLine
+//    }
     
     func showLoading() {
-        cityTable.isHidden = true
+        cityListCollection.isHidden = true
+      //  cityTable.isHidden = true
         loadingStackView.isHidden = false
         loadingIndicator.startAnimating()
         loadingLabel.isHidden = false
     }
     
     func hideLoading() {
-        cityTable.isHidden = false
+        cityListCollection.isHidden = false
+       // cityTable.isHidden = false
         loadingStackView.isHidden = true
         loadingIndicator.stopAnimating()
         loadingLabel.isHidden = true
     }
     
-    @objc
-    func showMap() {
-        presenter?.showMap()
-    }
-}
-
-// MARK: - UITableViewDelegate && UITableViewDataSource
-
-extension WeatherListViewController: UITableViewDelegate, UITableViewDataSource {
-    
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return cities.count
-    }
-    
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        guard let cell = tableView.dequeueReusableCell(withIdentifier: WeatherListCell.cellIdentifier, for: indexPath) as? WeatherListCell else {
-            return UITableViewCell()
+    func createLayout() -> UICollectionViewLayout {
+        let layout = UICollectionViewCompositionalLayout { (_, _) -> NSCollectionLayoutSection? in
+          
         }
-        
-        let city = cities[indexPath.row]
-        cell.configure(city: city)
-        return cell
+        return layout
     }
     
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        tableView.deselectRow(at: indexPath, animated: true)
-        presenter?.showDetailsCityWeather(city: cities[indexPath.row])
+    func applySnapShot(cities: [WeatherListItem]) {
+//        var snapShot = Snapshot()
+//        snapShot.appendSections([.favourites(cities), .negative(cities),  .positive(cities)])
+//        snapShot.appendItems(cities)
+//        dataSource.apply(snapShot, animatingDifferences: true)
     }
 }
 
@@ -163,14 +209,38 @@ extension WeatherListViewController: UITableViewDelegate, UITableViewDataSource 
 extension WeatherListViewController: UISearchResultsUpdating {
     
     func updateSearchResults(for searchController: UISearchController) {
-        print("Debug", searchController.searchBar.text)
-        presenter?.searchCity(searchController.searchBar.text ?? "")
+        guard let resultsController = searchController.searchResultsController as? SearchResultsViewController else { return }
+        
+        guard let cityName = searchController.searchBar.text else { return }
+        
+        resultsController.updateSearchResults(with: cityName)
+    }
+}
+
+extension WeatherListViewController: SearchResultsViewControllerDelegate {
+    
+    func didRequestSearch(for query: String) {
+        presenter?.searchCities(for: query)
+    }
+    
+    func didSelectCity(_ city: String) {
+        searchController.isActive = false
+        presenter?.search(city: city)
     }
 }
 
 // MARK: - WeatherListView
 
 extension WeatherListViewController: WeatherListView {
+    
+    func didUpdateSearchResults(
+        _ cities: [String],
+        countries: [String]
+    ) {
+        print("Получены результаты поиска: \(cities)")
+        guard let resultsController = searchController.searchResultsController as? SearchResultsViewController else { return }
+        resultsController.updateWithBackendResults(cities: cities, countries: countries)
+    }
     
     func hideLoadingIndicator() {
         hideLoading()
@@ -183,6 +253,8 @@ extension WeatherListViewController: WeatherListView {
     func didCityWeather(city: [WeatherListItem]) {
         self.cities = city
         hideLoading()
-        cityTable.reloadData()
+        applySnapShot(cities: city)
+       // cityTable.reloadData()
     }
 }
+

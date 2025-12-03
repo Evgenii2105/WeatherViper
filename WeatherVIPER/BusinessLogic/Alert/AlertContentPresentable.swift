@@ -26,6 +26,7 @@ struct AlertContent: AlertContentPresentable {
 }
 
 final class AlertFactoryServiceImpl: AlertFactoryService {
+    
     func showNetworkError(
         message: String,
         cancelHandler: @escaping () -> Void,

@@ -1,13 +1,13 @@
 //
-//  WeatherListCell.swift
+//  WeatherListCollectionCell.swift
 //  WeatherVIPER
 //
-//  Created by Евгений Фомичев on 12.08.2025.
+//  Created by Евгений Фомичев on 03.12.2025.
 //
 
 import UIKit
 
-final class WeatherListCell: UITableViewCell {
+final class WeatherListCollectionCell: UICollectionViewCell {
     
     // MARK: Constants
     
@@ -18,7 +18,7 @@ final class WeatherListCell: UITableViewCell {
     
     // MARK: Internal Properties
     
-    static let cellIdentifier = "WeatherListCell"
+    static let cellIdentifier = "WeatherListCollectionCell"
     private static let cache = NSCache<NSURL, UIImage>()
     
     // MARK: Private Properties
@@ -29,6 +29,18 @@ final class WeatherListCell: UITableViewCell {
         currentWeatherImage.clipsToBounds = false
         currentWeatherImage.tintColor = .green
         return currentWeatherImage
+    }()
+    
+    private lazy var favoritesButton: UIButton = {
+       let button = UIButton()
+        let image = UIImage(systemName: "star")
+        button.setImage(image, for: .normal)
+        button.addTarget(
+            self,
+            action: #selector(<#T##@objc method#>),
+            for: .touchUpInside
+        )
+        return button
     }()
     
     private let nameLabel: UILabel = {
@@ -83,19 +95,13 @@ final class WeatherListCell: UITableViewCell {
         return precipitationLabel
     }()
     
-    // MARK: Lifecycle
-    
-    override init(style: UITableViewCell.CellStyle, reuseIdentifier: String?) {
-        super.init(style: style, reuseIdentifier: reuseIdentifier)
-        setupUI()
-        setupConstraints()
+    override init(frame: CGRect) {
+        super.init(frame: frame)
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
-    // MARK: Actions
     
     func configure(city: WeatherListItem) {
         nameLabel.text = city.name
@@ -109,6 +115,8 @@ final class WeatherListCell: UITableViewCell {
         maxTemp.text = "H: \(city.maxTemp)°"
         minTemp.text = "L: \(city.minTemp)°"
         precipitationLabel.text = city.precipitation
+        
+        favoritesButton.isSelected = city.isFavorites
         
         guard let weatherImageUrl = city.weatherImage else {
             currentWeatherImage.image = UIImage(
@@ -143,7 +151,7 @@ final class WeatherListCell: UITableViewCell {
 
 // MARK: - Private Extension
 
-private extension WeatherListCell {
+private extension WeatherListCollectionCell {
     
     func setupUI() {
         contentView.backgroundColor = Colors.CitiesWeatherListBackground
@@ -198,5 +206,10 @@ private extension WeatherListCell {
             minTemp.trailingAnchor.constraint(equalTo: changeTempContainer.trailingAnchor),
             minTemp.centerYAnchor.constraint(equalTo: changeTempContainer.centerYAnchor)
         ])
+    }
+    
+    @objc
+    func favoritesButtonTouchUpInside() {
+        print("кнопка нажата")
     }
 }

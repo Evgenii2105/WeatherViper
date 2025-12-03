@@ -8,14 +8,17 @@
 import UIKit
 
 protocol WeatherListPresenter: AnyObject {
-    func searchCity(_ text: String)
+    func search(city: String)
     func setupDataSource()
     func showDetailsCityWeather(city: WeatherListItem)
     func showMap()
+    func remove(at index: Int)
+    func searchCities(for query: String) 
 }
 
 protocol WeatherListPresenterOutput: AnyObject {
     func didCityWeather(city: [WeatherListItem])
     func hideLoadingIndicator()
     func showLoadingIndicator()
+    func didUpdateSearchResults(_ cities: [String], countries: [String]) 
 }
