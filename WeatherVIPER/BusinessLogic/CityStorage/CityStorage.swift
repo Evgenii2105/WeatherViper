@@ -8,8 +8,8 @@
 import Foundation
 
 protocol CityStorage: AnyObject {
-    func saveCities(cities: [WeatherListItem])
-    func getCities() -> [WeatherListItem]
+    func saveCities(cities: [WeatherList.WeatherListItem])
+    func getCities() -> [WeatherList.WeatherListItem]
 }
 
 final class CityStorageImpl: CityStorage {
@@ -17,7 +17,7 @@ final class CityStorageImpl: CityStorage {
     private let userDefaults = UserDefaults.standard
     private let citiesKey = "cities"
     
-    func saveCities(cities: [WeatherListItem]) {
+    func saveCities(cities: [WeatherList.WeatherListItem]) {
         let citiesData = cities.map({ city in
             return [
                 "id": city.id,
@@ -33,13 +33,13 @@ final class CityStorageImpl: CityStorage {
         print("сохранено \(cities.count) городов")
     }
     
-    func getCities() -> [WeatherListItem] {
+    func getCities() -> [WeatherList.WeatherListItem] {
         guard let citiesData = userDefaults.array(forKey: citiesKey) as? [[String: Any]] else {
             print("нет сохраненных городов")
             return []
         }
         
-        let cities = citiesData.compactMap { dict -> WeatherListItem? in
+        let cities = citiesData.compactMap { dict -> WeatherList.WeatherListItem? in
             guard let id = dict["id"] as? Int,
                   let name = dict["name"] as? String,
                   let currentTemp = dict["currentTemp"] as? Double,
@@ -53,14 +53,15 @@ final class CityStorageImpl: CityStorage {
             let weatherImageString = dict["weatherImage"] as? String
             let weatherImage = weatherImageString?.isEmpty == false ? URL(string: weatherImageString!) : nil
             
-            return WeatherListItem(
+            return WeatherList.WeatherListItem(
                 id: id,
                 name: name,
                 currentTemp: currentTemp,
                 minTemp: minTemp,
                 maxTemp: maxTemp,
                 precipitation: precipitation,
-                weatherImage: weatherImage
+                weatherImage: weatherImage,
+                isFavorites: false
             )
         }
         return cities

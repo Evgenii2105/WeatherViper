@@ -8,7 +8,7 @@
 import Foundation
 
 protocol WeatherDetailsView: AnyObject {
-    func didGetWeather(city: WeatherListItem)
+    func didGetWeather(city: WeatherList.WeatherListItem)
     func didGetWeatherFiveDays(weather: [WeatherFiveDaysItem])
     func updateUI(with dataProvider: @escaping () -> [WeatherFiveDaysItem])
 }

@@ -23,7 +23,7 @@ final class WeatherDetailsPresenterImpl: WeatherDetailsPresenter {
 
 extension WeatherDetailsPresenterImpl: WeatherDetailsPresenterOutput {
     
-    func didGetWeather(city: WeatherListItem) {
+    func didGetWeather(city: WeatherList.WeatherListItem) {
         view?.didGetWeather(city: city)
     }
     

@@ -11,7 +11,7 @@ final class WeatherListRouterImpl: WeatherListRouter {
     
     weak var viewController: UIViewController?
     
-    func showDetailsCityWeather(city: WeatherListItem) {
+    func showDetailsCityWeather(city: WeatherList.WeatherListItem) {
         let view = WeatherDetailsViewController()
         let router = WeatherDetailsRouterImpl()
         let dataManager = DataManagerServiceImpl()

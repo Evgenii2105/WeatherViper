@@ -35,11 +35,11 @@ final class WeatherListCollectionCell: UICollectionViewCell {
        let button = UIButton()
         let image = UIImage(systemName: "star")
         button.setImage(image, for: .normal)
-        button.addTarget(
-            self,
-            action: #selector(<#T##@objc method#>),
-            for: .touchUpInside
-        )
+//        button.addTarget(
+//            self,
+//            action: #selector(<#T##@objc method#>),
+//            for: .touchUpInside
+//        )
         return button
     }()
     
@@ -97,13 +97,15 @@ final class WeatherListCollectionCell: UICollectionViewCell {
     
     override init(frame: CGRect) {
         super.init(frame: frame)
+        setupUI()
+        setupConstraints()
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
     
-    func configure(city: WeatherListItem) {
+    func configure(city: WeatherList.WeatherListItem) {
         nameLabel.text = city.name
         
         if city.currentTemp > 0 {

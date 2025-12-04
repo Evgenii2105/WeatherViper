@@ -8,7 +8,7 @@
 import Foundation
 
 protocol WeatherListRouter: AnyObject {
-    func showDetailsCityWeather(city: WeatherListItem)
+    func showDetailsCityWeather(city: WeatherList.WeatherListItem)
     func showError(alert: AlertContentPresentable)
     func showMap(listiner: MapListener)
 }

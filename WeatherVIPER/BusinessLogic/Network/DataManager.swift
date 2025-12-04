@@ -11,7 +11,7 @@ protocol DataManagerService: AnyObject {
     func getCurrentCity(
         coordinate: CLLocationCoordinate2D,
         weatherCityResult: @escaping (
-            Result<[WeatherListItem], NetworkError>
+            Result<[WeatherList.WeatherListItem], NetworkError>
         ) -> Void
     )
     func getDecoderCoordinate(
@@ -35,7 +35,7 @@ final class DataManagerServiceImpl: DataManagerService {
     func getCurrentCity(
         coordinate: CLLocationCoordinate2D,
         weatherCityResult: @escaping (
-            Result<[WeatherListItem], NetworkError>
+            Result<[WeatherList.WeatherListItem], NetworkError>
         ) -> Void
     ) {
         client.request(

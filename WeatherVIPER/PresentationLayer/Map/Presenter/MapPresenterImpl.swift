@@ -32,7 +32,7 @@ final class MapPresenterImpl: MapPresenter {
 
 extension MapPresenterImpl: MapPresenterOutput {
     
-    func didGetInfoCurrentCity(city: WeatherListItem) {
+    func didGetInfoCurrentCity(city: WeatherList.WeatherListItem) {
         view?.didGetCurrentInfo(city: city)
     }
 }

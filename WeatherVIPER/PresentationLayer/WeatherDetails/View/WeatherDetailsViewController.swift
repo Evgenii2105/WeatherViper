@@ -184,7 +184,7 @@ extension WeatherDetailsViewController: WeatherDetailsView {
         applySnapShot(weather: dataProvider())
     }
     
-    func didGetWeather(city: WeatherListItem) {
+    func didGetWeather(city: WeatherList.WeatherListItem) {
         configure(city: city)
     }
     
@@ -435,7 +435,7 @@ private extension WeatherDetailsViewController {
         dataSource.apply(snapShot, animatingDifferences: true)
     }
     
-    func configure(city: WeatherListItem) {
+    func configure(city: WeatherList.WeatherListItem) {
         currentCity.text = city.name
         currentTemp.text = "\(city.currentTemp)°"
         precipitationLabel.text = city.precipitation

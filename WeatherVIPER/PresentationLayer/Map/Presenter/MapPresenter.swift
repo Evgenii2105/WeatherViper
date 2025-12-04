@@ -15,5 +15,5 @@ protocol MapPresenter: AnyObject {
 }
 
 protocol MapPresenterOutput: AnyObject {
-    func didGetInfoCurrentCity(city: WeatherListItem)
+    func didGetInfoCurrentCity(city: WeatherList.WeatherListItem)
 }

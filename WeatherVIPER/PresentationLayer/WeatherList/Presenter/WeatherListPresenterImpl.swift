@@ -30,7 +30,7 @@ final class WeatherListPresenterImpl: WeatherListPresenter {
         interactor.setupDataSource()
     }
     
-    func showDetailsCityWeather(city: WeatherListItem) {
+    func showDetailsCityWeather(city: WeatherList.WeatherListItem) {
         interactor.showDetailsCityWeather(city: city)
     }
     
@@ -43,9 +43,15 @@ final class WeatherListPresenterImpl: WeatherListPresenter {
     }
 }
 
+// MARK: - WeatherListPresenterOutput
+
 extension WeatherListPresenterImpl: WeatherListPresenterOutput {
-   
-    func didCityWeather(city: [WeatherListItem]) {
+    
+    func didSectionsCityWeather(sections: [(type: WeatherList.Section, items: [WeatherList.WeatherListItem])]) {
+        view?.didSectionsCityWeather(sections: sections)
+    }
+
+    func didCityWeather(city: [WeatherList.WeatherListItem]) {
         view?.didCityWeather(city: city)
     }
     

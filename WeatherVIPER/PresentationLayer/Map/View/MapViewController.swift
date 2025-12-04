@@ -141,7 +141,7 @@ final class MapViewController: UIViewController, MKMapViewDelegate {
 
 extension MapViewController: MapView {
     
-    func didGetCurrentInfo(city: WeatherListItem) {
+    func didGetCurrentInfo(city: WeatherList.WeatherListItem) {
         currentWeatherInfoContainer.isHidden = false
         nameCity.text = city.name
         currentTemperature.text = "\(city.currentTemp)°"

@@ -12,7 +12,7 @@ protocol WeatherDetailsPresenter: AnyObject {
 }
 
 protocol WeatherDetailsPresenterOutput: AnyObject {
-    func didGetWeather(city: WeatherListItem)
+    func didGetWeather(city: WeatherList.WeatherListItem)
     func didGetWeatherFiveDays(weather: [WeatherFiveDaysItem])
     func didGetWeatherMakeLayout(_ weather: [WeatherFiveDaysItem])
 }

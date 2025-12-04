@@ -19,7 +19,7 @@ final class WeatherListInteractorImpl: WeatherListInteractor {
     weak var presenter: WeatherListPresenterOutput?
     private let router: WeatherListRouter
     private let dataManager: DataManagerService = DataManagerServiceImpl()
-    private var cityWeather: [WeatherListItem] = []
+    private var cityWeather: [WeatherList.WeatherListItem] = []
     private let alertFactory: AlertFactoryService
     private let citiesStorage: CityStorage
     
@@ -33,6 +33,7 @@ final class WeatherListInteractorImpl: WeatherListInteractor {
         self.router = router
         
         self.cityWeather = self.citiesStorage.getCities()
+
     }
     
     
@@ -62,7 +63,8 @@ final class WeatherListInteractorImpl: WeatherListInteractor {
                                 if !self.cityWeather.contains(where: { $0.id == newCity.id }) {
                                     self.cityWeather.append(newCity)
                                     self.citiesStorage.saveCities(cities: self.cityWeather)
-                                    self.presenter?.didCityWeather(city: self.cityWeather)
+                                    self.sendUpdatedDataToPresenter()
+                                   // self.presenter?.didCityWeather(city: self.cityWeather)
                                 }
                             }
                         }
@@ -103,13 +105,15 @@ final class WeatherListInteractorImpl: WeatherListInteractor {
         presenter?.showLoadingIndicator()
         
         guard !cityWeather.isEmpty else {
-            presenter?.didCityWeather(city: cityWeather)
+            self.sendUpdatedDataToPresenter()
+           // presenter?.didCityWeather(city: cityWeather)
             presenter?.hideLoadingIndicator()
             return
         }
         
         let group = DispatchGroup()
-        var updatedItems: [WeatherListItem] = []
+        var updatedItems: [WeatherList.WeatherListItem] = []
+        
         
         for city in cityWeather {
             group.enter()
@@ -124,7 +128,9 @@ final class WeatherListInteractorImpl: WeatherListInteractor {
                         return
                     }
                     let coord = CLLocationCoordinate2D(latitude: first.lat, longitude: first.lon)
-                    self.dataManager.getCurrentCity(coordinate: coord) { weatherResult in
+                    self.dataManager.getCurrentCity(
+                        coordinate: coord
+                    ) { weatherResult in
                         switch weatherResult {
                         case .success(let items):
                             if let item = items.first {
@@ -152,19 +158,51 @@ final class WeatherListInteractorImpl: WeatherListInteractor {
             }
             self.cityWeather = merged
             self.citiesStorage.saveCities(cities: self.cityWeather)
-            self.presenter?.didCityWeather(city: self.cityWeather)
+            self.sendUpdatedDataToPresenter()
+         //   self.presenter?.didCityWeather(city: self.cityWeather)
             self.presenter?.hideLoadingIndicator()
         }
     }
     
-    func showDetailsCityWeather(city: WeatherListItem) {
+    func showDetailsCityWeather(city: WeatherList.WeatherListItem) {
         router.showDetailsCityWeather(city: city)
     }
     
     func remove(at index: Int) {
         self.cityWeather.remove(at: index)
         self.citiesStorage.saveCities(cities: self.cityWeather)
-        presenter?.didCityWeather(city: self.cityWeather)
+        self.sendUpdatedDataToPresenter()
+       // presenter?.didCityWeather(city: self.cityWeather)
+    }
+}
+
+// MARK: - WeatherListInteractorImpl
+
+private extension WeatherListInteractorImpl {
+    
+    func sendUpdatedDataToPresenter() {
+        var sections: [(type: WeatherList.Section, items: [WeatherList.WeatherListItem])] = []
+        
+        if let currentCity = cityWeather.first(where: { $0.name == "Краснодар" }) {
+            sections.append((.current, [currentCity]))
+        }
+        
+        let favourites = cityWeather.filter({ $0.isFavorites })
+        if !favourites.isEmpty {
+            sections.append((.positive, favourites))
+        }
+        
+        let positive = cityWeather.filter({ $0.currentTemp > 0 && !$0.isFavorites })
+        if !positive.isEmpty {
+            sections.append((.positive, positive))
+        }
+        
+        let negative = cityWeather.filter({ $0.currentTemp <= 0 && !$0.isFavorites })
+        if !negative.isEmpty {
+            sections.append((.negative, negative))
+        }
+        
+        presenter?.didSectionsCityWeather(sections: sections)
     }
 }
 
@@ -181,7 +219,8 @@ extension WeatherListInteractorImpl: MapListener {
                 switch result {
                 case .success(let weatherCity):
                     self.cityWeather.append(contentsOf: weatherCity)
-                    self.presenter?.didCityWeather(city: self.cityWeather)
+                    self.sendUpdatedDataToPresenter()
+                   // self.presenter?.didCityWeather(city: self.cityWeather)
                 case .failure:
                     let alert = self.alertFactory.showNetworkError(
                         message: "Ошибка") {

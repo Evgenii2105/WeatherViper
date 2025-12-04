@@ -22,13 +22,12 @@ final class WeatherDetailsInteractorImpl: WeatherDetailsInteractor {
     
     weak var presenter: WeatherDetailsPresenterOutput?
     private let router: WeatherDetailsRouter
-    private let city: WeatherListItem
+    private let city: WeatherList.WeatherListItem
     private let dataManager: DataManagerService
-    // private var citiesWeather: [MainData.Item] = []
     
     init(
         dataManager: DataManagerService,
-        city: WeatherListItem,
+        city: WeatherList.WeatherListItem,
         router: WeatherDetailsRouter
     ) {
         self.city = city
