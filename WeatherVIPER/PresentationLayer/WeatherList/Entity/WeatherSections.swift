@@ -5,7 +5,7 @@
 //  Created by Евгений Фомичев on 03.12.2025.
 //
 
-import Foundation
+import UIKit
 
 enum WeatherList {
     
@@ -18,13 +18,13 @@ enum WeatherList {
         var title: String {
             switch self {
             case .current:
-                return "Текущий Город"
+                return "Current city"
             case .favourites:
-               return "Избранное"
+               return "Favorites"
             case .positive:
-                return "Тепленько"
+                return "Hot"
             case .negative:
-                return "Холод собачий"
+                return "Cold"
             }
         }
     }

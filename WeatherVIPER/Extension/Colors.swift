@@ -9,4 +9,5 @@ import UIKit
 
 enum Colors {
     static let CitiesWeatherListBackground  = UIColor(hexString: "#7d85f6")
+    static let cityCellBackground = UIColor(hexString: "#985CE7")
 }

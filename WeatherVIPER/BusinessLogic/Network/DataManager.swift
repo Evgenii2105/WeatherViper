@@ -60,7 +60,7 @@ final class DataManagerServiceImpl: DataManagerService {
             Result<[DecoderCoord], NetworkError>
         ) -> Void
     ) {
-        print("в дата манагере \(nameCity)")
+      //  print("в дата манагере \(nameCity)")
         client.request(
             endPoint: .geocoding(
                 cityName: nameCity

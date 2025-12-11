@@ -13,5 +13,6 @@ protocol WeatherListInteractor: AnyObject {
     func showDetailsCityWeather(city: WeatherList.WeatherListItem)
     func showMap()
     func remove(at index: Int)
-    func searchCities(for query: String) 
+    func searchCities(for query: String)
+    func changeFlag(isFavorite: Bool, cityId: Int)
 }

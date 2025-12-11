@@ -20,6 +20,7 @@ final class WeatherListCollectionCell: UICollectionViewCell {
     
     static let cellIdentifier = "WeatherListCollectionCell"
     private static let cache = NSCache<NSURL, UIImage>()
+    private var cityId: Int?
     
     // MARK: Private Properties
     
@@ -29,18 +30,6 @@ final class WeatherListCollectionCell: UICollectionViewCell {
         currentWeatherImage.clipsToBounds = false
         currentWeatherImage.tintColor = .green
         return currentWeatherImage
-    }()
-    
-    private lazy var favoritesButton: UIButton = {
-       let button = UIButton()
-        let image = UIImage(systemName: "star")
-        button.setImage(image, for: .normal)
-//        button.addTarget(
-//            self,
-//            action: #selector(<#T##@objc method#>),
-//            for: .touchUpInside
-//        )
-        return button
     }()
     
     private let nameLabel: UILabel = {
@@ -99,6 +88,7 @@ final class WeatherListCollectionCell: UICollectionViewCell {
         super.init(frame: frame)
         setupUI()
         setupConstraints()
+        contentView.layer.cornerRadius = 22
     }
     
     required init?(coder: NSCoder) {
@@ -106,6 +96,7 @@ final class WeatherListCollectionCell: UICollectionViewCell {
     }
     
     func configure(city: WeatherList.WeatherListItem) {
+        cityId = city.id
         nameLabel.text = city.name
         
         if city.currentTemp > 0 {
@@ -117,8 +108,6 @@ final class WeatherListCollectionCell: UICollectionViewCell {
         maxTemp.text = "H: \(city.maxTemp)°"
         minTemp.text = "L: \(city.minTemp)°"
         precipitationLabel.text = city.precipitation
-        
-        favoritesButton.isSelected = city.isFavorites
         
         guard let weatherImageUrl = city.weatherImage else {
             currentWeatherImage.image = UIImage(
@@ -208,10 +197,5 @@ private extension WeatherListCollectionCell {
             minTemp.trailingAnchor.constraint(equalTo: changeTempContainer.trailingAnchor),
             minTemp.centerYAnchor.constraint(equalTo: changeTempContainer.centerYAnchor)
         ])
-    }
-    
-    @objc
-    func favoritesButtonTouchUpInside() {
-        print("кнопка нажата")
     }
 }

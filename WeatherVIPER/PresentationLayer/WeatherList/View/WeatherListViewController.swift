@@ -28,6 +28,9 @@ class WeatherListViewController: UIViewController {
                     return UICollectionViewCell()
                 }
                 cell.configure(city: itemIdentifier)
+                cell.layer.borderColor = UIColor.lightGray.cgColor
+                cell.layer.borderWidth = 1
+                cell.layer.cornerRadius = 22
                 return cell
             }
         
@@ -41,6 +44,7 @@ class WeatherListViewController: UIViewController {
             ) as? SectionHeaderView
             
             let section = self.dataSource.snapshot().sectionIdentifiers[indexPath.section]
+           // let section = self.dataSource.snapshot().sectionIdentifiers[indexPath.section]
             header?.configure(title: section.title)
             
             return header
@@ -49,6 +53,7 @@ class WeatherListViewController: UIViewController {
     }()
     
     private let searchController: UISearchController
+    private var deletedIndexPath: IndexPath?
     
     private var cities: [WeatherList.WeatherListItem] = []
     
@@ -93,7 +98,6 @@ class WeatherListViewController: UIViewController {
             frame: .zero,
             collectionViewLayout: createLayout()
         )
-        
         collection.register(
             WeatherListCollectionCell.self,
             forCellWithReuseIdentifier: WeatherListCollectionCell.cellIdentifier
@@ -104,6 +108,8 @@ class WeatherListViewController: UIViewController {
             forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
             withReuseIdentifier: SectionHeaderView.reuseIdentifier
         )
+        
+        collection.delegate = self
         collection.backgroundColor = Colors.CitiesWeatherListBackground
         return collection
     }()
@@ -132,6 +138,19 @@ class WeatherListViewController: UIViewController {
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         cityListCollection.frame = view.bounds
+    }
+}
+
+// MARK: - UICollectionViewDelegate
+
+extension WeatherListViewController: UICollectionViewDelegate {
+    
+    func collectionView(
+        _ collectionView: UICollectionView,
+        didSelectItemAt indexPath: IndexPath
+    ) {
+        guard let item = dataSource.itemIdentifier(for: indexPath) else { return }
+        presenter?.showDetailsCityWeather(city: item)
     }
 }
 
@@ -186,43 +205,68 @@ private extension WeatherListViewController {
     }
     
     func createLayout() -> UICollectionViewLayout {
-           let layout = UICollectionViewCompositionalLayout { sectionIndex, layoutEnvironment in
-               let itemSize = NSCollectionLayoutSize(
-                   widthDimension: .fractionalWidth(1.0),
-                   heightDimension: .estimated(100)
-               )
-               let item = NSCollectionLayoutItem(layoutSize: itemSize)
-               
-               let groupSize = NSCollectionLayoutSize(
-                   widthDimension: .fractionalWidth(1.0),
-                   heightDimension: .estimated(100)
-               )
-               let group = NSCollectionLayoutGroup.vertical(layoutSize: groupSize, subitems: [item])
-               
-               let section = NSCollectionLayoutSection(group: group)
-               section.interGroupSpacing = 8
-               section.contentInsets = NSDirectionalEdgeInsets(top: 16, leading: 16, bottom: 16, trailing: 16)
-               
-               let headerSize = NSCollectionLayoutSize(
-                   widthDimension: .fractionalWidth(1.0),
-                   heightDimension: .estimated(44)
-               )
-               let header = NSCollectionLayoutBoundarySupplementaryItem(
-                   layoutSize: headerSize,
-                   elementKind: UICollectionView.elementKindSectionHeader,
-                   alignment: .top
-               )
-               section.boundarySupplementaryItems = [header]
-               
-               return section
-           }
-           return layout
-       }
+        let layout = UICollectionViewCompositionalLayout { sectionIndex, layoutEnvironment in
+            var config = UICollectionLayoutListConfiguration(appearance: .plain)
+           // config.showsSeparators = true
+            config.backgroundColor = Colors.CitiesWeatherListBackground
+            config.trailingSwipeActionsConfigurationProvider = { indexPath in
+                guard let item = self.dataSource.itemIdentifier(for: indexPath) else { return nil }
+                let deleteAction = UIContextualAction(
+                    style: .destructive,
+                    title: "Deleted"
+                ) { action, sourceView, actionPerformed in
+                    guard let _ = self.dataSource.itemIdentifier(for: indexPath) else { return }
+                    print("удалил: \(indexPath.item), \(item), item: \(indexPath.item)")
+                    self.presenter?.remove(at: item.id)
+                    actionPerformed(true)
+                }
+                deleteAction.backgroundColor = .red
+                deleteAction.image = UIImage(systemName: "trash")
+                
+                let favoritesTitle = item.isFavorites ? "Remove from favorites" : "Add in favorites"
+                let favoritesAction = UIContextualAction(
+                    style: .normal,
+                    title: favoritesTitle,
+                ) { action, sourceView, actionPerformed in
+                        guard let  indexPathItem = self.dataSource.itemIdentifier(for: indexPath) else { return }
+                    self.presenter?.changeFlag(isFavorite: !item.isFavorites, cityId: indexPathItem.id)
+                        actionPerformed(true)
+                    }
+                
+                favoritesAction.backgroundColor = .orange
+                favoritesAction.image = UIImage(systemName: "star")
+                return UISwipeActionsConfiguration(actions: [deleteAction, favoritesAction])
+            }
+            
+            let section = NSCollectionLayoutSection.list(using: config, layoutEnvironment: layoutEnvironment)
+            
+            section.interGroupSpacing = 16
+            section.contentInsets = NSDirectionalEdgeInsets(
+                top: 8,
+                leading: 8,
+                bottom: 8,
+                trailing: 8
+            )
+            
+            let headerSize = NSCollectionLayoutSize(
+                widthDimension: .fractionalWidth(1.0),
+                heightDimension: .estimated(44)
+            )
+            let header = NSCollectionLayoutBoundarySupplementaryItem(
+                layoutSize: headerSize,
+                elementKind: UICollectionView.elementKindSectionHeader,
+                alignment: .top
+            )
+            section.boundarySupplementaryItems = [header]
+            
+            return section
+        }
+        return layout
+    }
     
     func applySnapShot(sections: [(type: WeatherList.Section, items: [WeatherList.WeatherListItem])]) {
         var snapShot = Snapshot()
         for section in sections {
-            print(section)
             snapShot.appendSections([section.type])
             snapShot.appendItems(section.items, toSection: section.type)
         }
@@ -235,13 +279,14 @@ private extension WeatherListViewController {
 extension WeatherListViewController: UISearchResultsUpdating {
     
     func updateSearchResults(for searchController: UISearchController) {
-        guard let resultsController = searchController.searchResultsController as? SearchResultsViewController else { return }
-        
-        guard let cityName = searchController.searchBar.text else { return }
-        
+        guard let resultsController = searchController.searchResultsController as? SearchResultsViewController,
+                let cityName = searchController.searchBar.text else { return }
+    
         resultsController.updateSearchResults(with: cityName)
     }
 }
+
+// MARK: - SearchResultsViewControllerDelegate
 
 extension WeatherListViewController: SearchResultsViewControllerDelegate {
     
@@ -262,7 +307,6 @@ extension WeatherListViewController: WeatherListView {
     func didSectionsCityWeather(
         sections: [(type: WeatherList.Section, items: [WeatherList.WeatherListItem])]
     ) {
-        print(sections)
         hideLoading()
         applySnapShot(sections: sections)
     }
@@ -271,7 +315,6 @@ extension WeatherListViewController: WeatherListView {
         _ cities: [String],
         countries: [String]
     ) {
-        print("Получены результаты поиска: \(cities)")
         guard let resultsController = searchController.searchResultsController as? SearchResultsViewController else { return }
         resultsController.updateWithBackendResults(cities: cities, countries: countries)
     }
@@ -283,12 +326,4 @@ extension WeatherListViewController: WeatherListView {
     func showLoadingIndicator() {
         showLoading()
     }
-    
-    func didCityWeather(city: [WeatherList.WeatherListItem]) {
-       // self.cities = city
-       // hideLoading()
-        // applySnapShot(sections: <#T##[(WeatherList.Section, [WeatherList.WeatherListItem])]#>)
-       // cityTable.reloadData()
-    }
 }
-

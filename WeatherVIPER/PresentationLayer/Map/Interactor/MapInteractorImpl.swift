@@ -34,11 +34,8 @@ final class MapInteractorImpl: MapInteractor {
     }
     
     func handleMapTap(with coordinates: CLLocationCoordinate2D) {
-        listener?.didCoordinate(with: coordinates)
-    }
-    
-    func dismissModule() {
         router.dismissModule()
+        listener?.didCoordinate(with: coordinates)
     }
     
     func getCurrentInfoCity(_ coordinates: CLLocationCoordinate2D) {

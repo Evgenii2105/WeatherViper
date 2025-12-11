@@ -21,10 +21,6 @@ final class MapPresenterImpl: MapPresenter {
         interactor.handleMapTap(with: coordinates)
     }
     
-    func dismissModule() {
-        interactor.dismissModule()
-    }
-    
     func getCurrentInfoCity(_ coordinates: CLLocationCoordinate2D) {
         interactor.getCurrentInfoCity(coordinates)
     }

@@ -7,8 +7,6 @@
 
 import Foundation
 
-
-
 struct SearchResult {
     let name: String
 }

@@ -47,7 +47,7 @@ final class WeatherDetailsInteractorImpl: WeatherDetailsInteractor {
                     print("массив координат пустой")
                     return
                 }
-                print("Успешно получили координаты для города: \(firstCoordinates.name)")
+               // print("Успешно получили координаты для города: \(firstCoordinates.name)")
                 self.getWeatherFiveDays(
                     coordinates: firstCoordinates,
                     state: layout

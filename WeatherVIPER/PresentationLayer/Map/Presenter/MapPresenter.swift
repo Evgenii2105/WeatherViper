@@ -10,7 +10,6 @@ import CoreLocation
 
 protocol MapPresenter: AnyObject {
     func handleMapTap(with coordinates: CLLocationCoordinate2D)
-    func dismissModule()
     func getCurrentInfoCity(_ coordinates: CLLocationCoordinate2D)
 }
 

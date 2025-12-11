@@ -41,18 +41,21 @@ final class WeatherListPresenterImpl: WeatherListPresenter {
     func remove(at index: Int) {
         interactor.remove(at: index)
     }
+    
+    func changeFlag(isFavorite: Bool, cityId: Int) {
+        interactor.changeFlag(isFavorite: isFavorite, cityId: cityId)
+    }
 }
 
 // MARK: - WeatherListPresenterOutput
 
 extension WeatherListPresenterImpl: WeatherListPresenterOutput {
     
-    func didSectionsCityWeather(sections: [(type: WeatherList.Section, items: [WeatherList.WeatherListItem])]) {
+    func didSectionsCityWeather(
+        sections: [(type: WeatherList.Section,
+                    items: [WeatherList.WeatherListItem])]
+    ) {
         view?.didSectionsCityWeather(sections: sections)
-    }
-
-    func didCityWeather(city: [WeatherList.WeatherListItem]) {
-        view?.didCityWeather(city: city)
     }
     
     func hideLoadingIndicator() {

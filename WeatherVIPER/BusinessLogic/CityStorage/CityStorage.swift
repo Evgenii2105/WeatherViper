@@ -26,10 +26,12 @@ final class CityStorageImpl: CityStorage {
                 "maxTemp" : city.maxTemp,
                 "minTemp" : city.minTemp,
                 "precipitation" : city.precipitation,
-                "weatherImage" : city.weatherImage?.absoluteString ?? ""
+                "weatherImage" : city.weatherImage?.absoluteString ?? "",
+                "isFavorites" : city.isFavorites
             ]
         })
         userDefaults.set(citiesData, forKey: self.citiesKey)
+        userDefaults.synchronize()
         print("сохранено \(cities.count) городов")
     }
     
@@ -45,7 +47,8 @@ final class CityStorageImpl: CityStorage {
                   let currentTemp = dict["currentTemp"] as? Double,
                   let maxTemp = dict["maxTemp"] as? Double,
                   let minTemp = dict["minTemp"] as? Double,
-                  let precipitation = dict["precipitation"] as? String else {
+                  let precipitation = dict["precipitation"] as? String,
+                  let isFavorites = dict["isFavorites"] as? Bool else {
                 print("Ошибка получения города из UserDefaults")
                 return nil
             }
@@ -61,7 +64,7 @@ final class CityStorageImpl: CityStorage {
                 maxTemp: maxTemp,
                 precipitation: precipitation,
                 weatherImage: weatherImage,
-                isFavorites: false
+                isFavorites: isFavorites
             )
         }
         return cities

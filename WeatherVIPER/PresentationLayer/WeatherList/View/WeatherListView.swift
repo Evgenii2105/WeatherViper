@@ -8,7 +8,6 @@
 import Foundation
 
 protocol WeatherListView: AnyObject {
-    func didCityWeather(city: [WeatherList.WeatherListItem])
     func hideLoadingIndicator()
     func showLoadingIndicator()
     func didUpdateSearchResults(_ cities: [String], countries: [String])

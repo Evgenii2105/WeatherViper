@@ -125,6 +125,7 @@ final class WeatherDetailsViewController: UIViewController {
             withReuseIdentifier: BadgeSupplementaryView.reuseIdentifier
         )
         fiveDayWeatherCollection.backgroundColor = Colors.CitiesWeatherListBackground
+        fiveDayWeatherCollection.layer.cornerRadius = 22
         return fiveDayWeatherCollection
     }()
     

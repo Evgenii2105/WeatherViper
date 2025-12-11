@@ -13,11 +13,11 @@ protocol WeatherListPresenter: AnyObject {
     func showDetailsCityWeather(city: WeatherList.WeatherListItem)
     func showMap()
     func remove(at index: Int)
-    func searchCities(for query: String) 
+    func searchCities(for query: String)
+    func changeFlag(isFavorite: Bool, cityId: Int)
 }
 
 protocol WeatherListPresenterOutput: AnyObject {
-    func didCityWeather(city: [WeatherList.WeatherListItem])
     func hideLoadingIndicator()
     func showLoadingIndicator()
     func didUpdateSearchResults(_ cities: [String], countries: [String])

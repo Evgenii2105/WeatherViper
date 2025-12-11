@@ -25,17 +25,6 @@ final class MapViewController: UIViewController, MKMapViewDelegate {
     private var containerMenuTopConstraint: NSLayoutConstraint?
     private var containerMenuLeadingConstraint: NSLayoutConstraint?
     
-    private lazy var doneSearchCity: UIBarButtonItem = {
-        return UIBarButtonItem(
-            systemItem: .done,
-            primaryAction: UIAction(
-                handler: { [weak self] _ in
-                    self?.presenter?.dismissModule()
-                }
-            )
-        )
-    }()
-    
     private lazy var currentWeatherInfoContainer: UIView = {
         let currentWeatherInfoContainer = UIView()
         currentWeatherInfoContainer.backgroundColor = .lightGray
@@ -166,8 +155,7 @@ private extension MapViewController {
     func setupUI() {
         view.backgroundColor = .white
         view.addSubview(mapView)
-        
-        navigationItem.rightBarButtonItem = doneSearchCity
+ 
         mapView.addSubview(currentWeatherInfoContainer)
         mapView.addSubview(menuContainer)
         menuContainer.addSubview(buttonStack)
@@ -327,10 +315,6 @@ private extension MapViewController {
         menuContainer.isHidden = false
         
         presenter?.getCurrentInfoCity(tappedCoordinate)
-    }
-    
-    func addCity(annotation: CLLocationCoordinate2D) {
-        presenter?.handleMapTap(with: annotation)
     }
     
     func createLayout() -> UICollectionViewLayout {
