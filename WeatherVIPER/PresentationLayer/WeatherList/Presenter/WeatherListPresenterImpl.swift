@@ -50,12 +50,9 @@ final class WeatherListPresenterImpl: WeatherListPresenter {
 // MARK: - WeatherListPresenterOutput
 
 extension WeatherListPresenterImpl: WeatherListPresenterOutput {
-    
-    func didSectionsCityWeather(
-        sections: [(type: WeatherList.Section,
-                    items: [WeatherList.WeatherListItem])]
-    ) {
-        view?.didSectionsCityWeather(sections: sections)
+ 
+    func updateUI(with sections: [WeatherList.SectionData]) {
+        view?.updateUI { sections } 
     }
     
     func hideLoadingIndicator() {

@@ -1,5 +1,5 @@
 //
-//  SectionHeaderView.swift
+//  CurrentHeaderView.swift
 //  WeatherVIPER
 //
 //  Created by Евгений Фомичев on 04.12.2025.
@@ -7,9 +7,7 @@
 
 import UIKit
 
-final class SectionHeaderView: UICollectionReusableView {
-    
-    static let reuseIdentifier = "SectionHeaderView"
+final class CurrentHeaderView: UICollectionReusableView {
     
     private let titleLabel: UILabel = {
         let label = UILabel()

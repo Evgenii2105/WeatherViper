@@ -471,8 +471,6 @@ private extension WeatherDetailsViewController {
 
 private final class BadgeSupplementaryView: UICollectionReusableView {
     
-    static let reuseIdentifier = "BadgeSupplementaryView"
-    
     private let badgeView: UIView = {
         let badgeView = UIView()
         badgeView.isHidden = true

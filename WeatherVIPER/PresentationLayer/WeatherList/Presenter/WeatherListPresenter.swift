@@ -21,5 +21,6 @@ protocol WeatherListPresenterOutput: AnyObject {
     func hideLoadingIndicator()
     func showLoadingIndicator()
     func didUpdateSearchResults(_ cities: [String], countries: [String])
-    func didSectionsCityWeather(sections: [(type: WeatherList.Section, items: [WeatherList.WeatherListItem])])
+    // func didSectionsCityWeather(sections: [(type: WeatherList.Section, items: [WeatherList.WeatherListItem])])
+    func updateUI(with sections: [WeatherList.SectionData])
 }

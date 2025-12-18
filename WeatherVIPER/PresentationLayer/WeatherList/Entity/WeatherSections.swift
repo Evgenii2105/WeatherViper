@@ -9,7 +9,7 @@ import UIKit
 
 enum WeatherList {
     
-    enum Section: Hashable {
+    enum Section: Hashable, CaseIterable {
         case current
         case favourites
         case positive
@@ -39,6 +39,12 @@ enum WeatherList {
         let weatherImage: URL?
         let isFavorites: Bool
     }
+    
+    struct SectionData {
+        let section: Section
+        let items: [WeatherListItem]
+        let color: UIColor
+    }
 }
 
 extension WeatherResponse {
@@ -52,7 +58,7 @@ extension WeatherResponse {
             maxTemp: self.main.tempMAX,
             precipitation: self.weather.first?.description ?? "",
             weatherImage: self.weather.first?.iconURL,
-            isFavorites: false
+            isFavorites: false,
         )
     }
 }

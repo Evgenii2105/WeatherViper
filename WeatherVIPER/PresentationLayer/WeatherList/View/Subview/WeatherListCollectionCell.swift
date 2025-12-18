@@ -145,6 +145,7 @@ final class WeatherListCollectionCell: UICollectionViewCell {
 private extension WeatherListCollectionCell {
     
     func setupUI() {
+        // contentView.layer
         contentView.backgroundColor = Colors.CitiesWeatherListBackground
         contentView.addSubview(currentWeatherImage)
         contentView.addSubview(nameLabel)

@@ -33,7 +33,6 @@ final class WeatherListInteractorImpl: WeatherListInteractor {
         self.router = router
         
         self.cityWeather = self.citiesStorage.getCities()
-
     }
     
     func search(city: String) {
@@ -203,15 +202,32 @@ final class WeatherListInteractorImpl: WeatherListInteractor {
 private extension WeatherListInteractorImpl {
     
     func sendUpdatedDataToPresenter() {
-        var sections: [(type: WeatherList.Section, items: [WeatherList.WeatherListItem])] = []
-        
+          let sections = distributeCitiesIntoSections()
+          presenter?.updateUI(with: sections)
+      }
+
+     func distributeCitiesIntoSections() -> [WeatherList.SectionData] {
+        var sections: [WeatherList.SectionData] = []
         if let currentCity = cityWeather.first(where: { $0.name == "Краснодар" }) {
-            sections.append((.current, [currentCity]))
+            sections.append(
+                .init(
+                    section: .current,
+                    items: [currentCity],
+                    color: .lightGray
+                )
+            )
         }
         
         let favourites = cityWeather.filter({ $0.isFavorites })
         if !favourites.isEmpty {
-            sections.append((.favourites, favourites))
+        
+            sections.append(
+                .init(
+                    section: .favourites,
+                    items: favourites,
+                    color: .orange
+                )
+            )
         }
         
         let positive = cityWeather.filter{
@@ -220,7 +236,13 @@ private extension WeatherListInteractorImpl {
             $0.name != "Краснодар"
         }
         if !positive.isEmpty {
-            sections.append((.positive, positive))
+            sections.append(
+                .init(
+                    section: .positive,
+                    items: positive,
+                    color: .green
+                )
+            )
         }
         
         let negative = cityWeather.filter{
@@ -229,9 +251,15 @@ private extension WeatherListInteractorImpl {
             $0.name != "Краснодар"
         }
         if !negative.isEmpty {
-            sections.append((.negative, negative))
+            sections.append(
+                .init(
+                    section: .negative,
+                    items: negative,
+                    color: .blue
+                )
+            )
         }
-        presenter?.didSectionsCityWeather(sections: sections)
+        return sections
     }
 }
 

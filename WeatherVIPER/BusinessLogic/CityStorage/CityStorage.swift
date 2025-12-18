@@ -64,7 +64,7 @@ final class CityStorageImpl: CityStorage {
                 maxTemp: maxTemp,
                 precipitation: precipitation,
                 weatherImage: weatherImage,
-                isFavorites: isFavorites
+                isFavorites: isFavorites,
             )
         }
         return cities
