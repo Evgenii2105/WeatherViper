@@ -11,6 +11,7 @@ final class CurrentHeaderView: UICollectionReusableView {
     
     private let titleLabel: UILabel = {
         let label = UILabel()
+        label.text = "Current city"
         label.font = .systemFont(ofSize: 18, weight: .bold)
         label.textColor = .darkGray
         return label

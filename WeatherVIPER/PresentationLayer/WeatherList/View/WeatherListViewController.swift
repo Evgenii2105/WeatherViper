@@ -35,17 +35,38 @@ class WeatherListViewController: UIViewController {
         
         data.supplementaryViewProvider = { collectionView, kind, indexPath in
             guard kind == UICollectionView.elementKindSectionHeader else { return nil }
-            
-            let header = collectionView.dequeueReusableSupplementaryView(
-                ofKind: kind,
-                withReuseIdentifier: CurrentHeaderView.reuseIdentifier,
-                for: indexPath
-            ) as? CurrentHeaderView
-            
-            let section = self.dataSource.snapshot().sectionIdentifiers[indexPath.section]
-            header?.configure(title: section.title)
-            
-            return header
+            let sections = data.snapshot().sectionIdentifiers
+            let section = sections[indexPath.section]
+            switch section {
+            case .current:
+                let currentHeader = collectionView.dequeueReusableSupplementaryView(
+                    ofKind: kind,
+                    withReuseIdentifier: CurrentHeaderView.reuseIdentifier,
+                    for: indexPath
+                ) as? CurrentHeaderView
+                return currentHeader
+            case .favourites:
+                let headerFavorites = collectionView.dequeueReusableSupplementaryView(
+                    ofKind: kind,
+                    withReuseIdentifier: FavoritesHeaderView.reuseIdentifier,
+                    for: indexPath
+                )
+                return headerFavorites
+            case .positive:
+                let headerHot = collectionView.dequeueReusableSupplementaryView(
+                    ofKind: kind,
+                    withReuseIdentifier: HotHeaderView.reuseIdentifier,
+                    for: indexPath
+                )
+                return headerHot
+            case .negative:
+                let coldHeader = collectionView.dequeueReusableSupplementaryView(
+                    ofKind: kind,
+                    withReuseIdentifier: ColdHeaderView.reuseIdentifier,
+                    for: indexPath
+                )
+                return coldHeader
+            }
         }
         return data
     }()
@@ -105,6 +126,24 @@ class WeatherListViewController: UIViewController {
             CurrentHeaderView.self,
             forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
             withReuseIdentifier: CurrentHeaderView.reuseIdentifier
+        )
+        
+        collection.register(
+            FavoritesHeaderView.self,
+            forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
+            withReuseIdentifier: FavoritesHeaderView.reuseIdentifier
+        )
+        
+        collection.register(
+            HotHeaderView.self,
+            forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
+            withReuseIdentifier: HotHeaderView.reuseIdentifier
+        )
+        
+        collection.register(
+            ColdHeaderView.self,
+            forSupplementaryViewOfKind: UICollectionView.elementKindSectionHeader,
+            withReuseIdentifier: ColdHeaderView.reuseIdentifier
         )
         
         collection.delegate = self
@@ -284,6 +323,7 @@ private extension WeatherListViewController {
                 elementKind: UICollectionView.elementKindSectionHeader,
                 alignment: .top
             )
+            header.pinToVisibleBounds = true
             section.boundarySupplementaryItems = [header]
             
             return section

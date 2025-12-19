@@ -14,19 +14,6 @@ enum WeatherList {
         case favourites
         case positive
         case negative
-        
-        var title: String {
-            switch self {
-            case .current:
-                return "Current city"
-            case .favourites:
-               return "Favorites"
-            case .positive:
-                return "Hot"
-            case .negative:
-                return "Cold"
-            }
-        }
     }
     
     struct WeatherListItem: Hashable {
