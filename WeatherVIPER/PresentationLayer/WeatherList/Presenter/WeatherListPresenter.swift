@@ -15,12 +15,15 @@ protocol WeatherListPresenter: AnyObject {
     func remove(at index: Int)
     func searchCities(for query: String)
     func changeFlag(isFavorite: Bool, cityId: Int)
+    func downloadImage(url: WeatherList.WeatherListItem.ImageContainer, indexPath: IndexPath)
+    func downloadArray(indexPaths: [IndexPath], models: [WeatherList.WeatherListItem])
 }
 
 protocol WeatherListPresenterOutput: AnyObject {
     func hideLoadingIndicator()
     func showLoadingIndicator()
     func didUpdateSearchResults(_ cities: [String], countries: [String])
-    // func didSectionsCityWeather(sections: [(type: WeatherList.Section, items: [WeatherList.WeatherListItem])])
     func updateUI(with sections: [WeatherList.SectionData])
+    func updateDataSource(with section: [WeatherList.SectionData])
+    // func didUpdateCity(at indexPath: IndexPath, with city: WeatherList.WeatherListItem)
 }

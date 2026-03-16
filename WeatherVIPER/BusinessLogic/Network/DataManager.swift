@@ -6,6 +6,7 @@
 //
 
 import CoreLocation
+import UIKit
 
 protocol DataManagerService: AnyObject {
     func getCurrentCity(
@@ -25,6 +26,10 @@ protocol DataManagerService: AnyObject {
         fiveWeatherResult: @escaping (
             Result<MainFiveWeatherResponse, NetworkError>
         ) -> Void
+    )
+    func loadImage(
+        from url: URL,
+        completion: @escaping (UIImage?) -> Void
     )
 }
 
@@ -60,7 +65,6 @@ final class DataManagerServiceImpl: DataManagerService {
             Result<[DecoderCoord], NetworkError>
         ) -> Void
     ) {
-      //  print("в дата манагере \(nameCity)")
         client.request(
             endPoint: .geocoding(
                 cityName: nameCity
@@ -94,6 +98,17 @@ final class DataManagerServiceImpl: DataManagerService {
             case .failure(let error):
                 fiveWeatherResult(.failure(.requestFailed(error.localizedDescription)))
             }
+        }
+    }
+    
+    func loadImage(
+        from url: URL,
+        completion: @escaping (UIImage?) -> Void
+    ) {
+        client.downloadImage(
+            from: url
+        ) { image in
+            completion(image)
         }
     }
 }

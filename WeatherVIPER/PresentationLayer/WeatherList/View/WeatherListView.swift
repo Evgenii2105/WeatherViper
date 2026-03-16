@@ -6,12 +6,12 @@
 //
 
 import Foundation
+import UIKit
 
 protocol WeatherListView: AnyObject {
     func hideLoadingIndicator()
     func showLoadingIndicator()
     func didUpdateSearchResults(_ cities: [String], countries: [String])
-   // func didSectionsCityWeather(sections: WeatherList.SectionData)
-  //  func didSectionsCityWeather(sections: [(type: WeatherList.Section, items: [WeatherList.WeatherListItem])])
     func updateUI(with dataProvider: @escaping () -> [WeatherList.SectionData])
+    func updateDataSource(with dataProvider: @escaping () -> [WeatherList.SectionData])
 }

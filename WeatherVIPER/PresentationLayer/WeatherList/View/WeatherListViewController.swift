@@ -74,7 +74,7 @@ class WeatherListViewController: UIViewController {
     private let searchController: UISearchController
     private var deletedIndexPath: IndexPath?
     
-    private var cities: [WeatherList.WeatherListItem] = []
+    // private var cities: [WeatherList.WeatherListItem] = []
     
     private let loadingIndicator: UIActivityIndicatorView = {
         let indicator = UIActivityIndicatorView(style: .large)
@@ -170,6 +170,7 @@ class WeatherListViewController: UIViewController {
         setupUI()
         setupConstraints()
         presenter?.setupDataSource()
+        cityListCollection.prefetchDataSource = self
     }
     
     override func viewDidLayoutSubviews() {
@@ -290,6 +291,8 @@ private extension WeatherListViewController {
                 trailing: 8
             )
             
+            // section = NSCollectionLayoutSection.
+            
             let backgroundDecorationsCurrent = NSCollectionLayoutDecorationItem.background(
                 elementKind: RoundedCurrentBackgroundView.reuseIdentifier
             )
@@ -348,7 +351,6 @@ private extension WeatherListViewController {
         return layout
     }
     
-    
     func applySnapShot(sections: [WeatherList.SectionData]) {
         var snapShot = Snapshot()
         
@@ -392,7 +394,13 @@ extension WeatherListViewController: SearchResultsViewControllerDelegate {
 
 extension WeatherListViewController: WeatherListView {
     
-    func updateUI(with dataProvider: @escaping () -> [WeatherList.SectionData]) {
+    func updateDataSource(with dataProvider: @escaping () -> [WeatherList.SectionData]) {
+        applySnapShot(sections: dataProvider())
+    }
+
+    func updateUI(
+        with dataProvider: @escaping () -> [WeatherList.SectionData]
+    ) {
         let newLayout = makeLayout(with: dataProvider)
         cityListCollection.setCollectionViewLayout(newLayout, animated: true)
         applySnapShot(sections: dataProvider())
@@ -412,5 +420,41 @@ extension WeatherListViewController: WeatherListView {
     
     func showLoadingIndicator() {
         showLoading()
+    }
+}
+
+// MARK: - UICollectionViewDataSourcePrefetching
+
+extension WeatherListViewController: UICollectionViewDataSourcePrefetching {
+    
+    func collectionView(
+        _ collectionView: UICollectionView,
+        prefetchItemsAt indexPaths: [IndexPath]
+    ) {
+        for indexPath in indexPaths {
+            let model = dataSource.snapshot().itemIdentifiers[indexPath.item]
+           // print("image: \(model.weatherImage), indexPathSection: \(indexPath.section), indexPathItem: \(indexPath.item) ")
+          presenter?.downloadImage(url: model.imageContainer, indexPath: indexPath)
+            //presenter?.downloadArray(indexPaths: indexPaths, models: dataSource.snapshot().itemIdentifiers)
+        }
+    }
+    
+    func collectionView(
+        _ collectionView: UICollectionView,
+        cancelPrefetchingForItemsAt indexPaths: [IndexPath]
+    ) {
+        for indexPath in indexPaths {
+            let model = dataSource.snapshot().itemIdentifiers[indexPath.item]
+           // print("cancel: \(model)")
+        }
+    }
+}
+
+// MARK: - PrefetchImageDelegate
+
+extension WeatherListViewController: PrefetchImageDelegate {
+    
+    func downloadedImageDelegate() {
+       // presenter?.downloadImage(url: <#T##URL?#>, indexPath: <#T##IndexPath#>)
     }
 }

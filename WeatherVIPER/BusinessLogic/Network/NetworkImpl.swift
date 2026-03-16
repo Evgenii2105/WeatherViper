@@ -9,7 +9,7 @@ import UIKit
 
 final class NetworkImpl {
     
-    static func downloadImage(
+    func downloadImage(
         from url: URL,
         completion: @escaping (UIImage?) ->Void
     ) {

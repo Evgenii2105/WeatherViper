@@ -14,7 +14,7 @@ struct Weather: Decodable {
     let icon: String
     
     var iconURL: URL? {
-        return URL(string: "https://openweathermap.org/img/wn/\(icon)@2x.png")
+        return URL(string: "https://openweathermap.org/img/wn/\(icon)@4x.png")
     }
     
     enum CodingKeys: String, CodingKey {

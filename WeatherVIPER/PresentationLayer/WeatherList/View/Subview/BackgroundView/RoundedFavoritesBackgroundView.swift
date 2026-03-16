@@ -20,7 +20,7 @@ final class RoundedFavoritesBackgroundView: UICollectionReusableView {
     override init(frame: CGRect) {
         super.init(frame: frame)
         addSubview(insertView)
-        
+        insertView.alpha = 0.4
         insertView.addConstraints(constraints: [
             insertView.topAnchor.constraint(equalTo: topAnchor, constant: 8),
             insertView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 8),

@@ -55,18 +55,18 @@ final class FiveDayWeatherCollectionCell: UICollectionViewCell {
             return
         }
         
-        NetworkImpl.downloadImage(
-            from: weatherImageUrl
-        ) { [weak self] image in
-            guard let self else { return }
-            DispatchQueue.main.async {
-                if let downloadedImage = image {
-                    self.iconWeatherImage.image = downloadedImage
-                } else {
-                    self.iconWeatherImage.image = UIImage(systemName: "photo.badge.exclamationmark")
-                }
-            }
-        }
+//        NetworkImpl.downloadImage(
+//            from: weatherImageUrl
+//        ) { [weak self] image in
+//            guard let self else { return }
+//            DispatchQueue.main.async {
+//                if let downloadedImage = image {
+//                    self.iconWeatherImage.image = downloadedImage
+//                } else {
+//                    self.iconWeatherImage.image = UIImage(systemName: "photo.badge.exclamationmark")
+//                }
+//            }
+//        }
     }
 }
 

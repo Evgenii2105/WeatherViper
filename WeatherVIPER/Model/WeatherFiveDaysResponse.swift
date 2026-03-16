@@ -44,20 +44,14 @@ struct WeatherFiveDaysResponse: Decodable {
 
 struct MainFiveDays: Decodable {
     let temp: Double
-//    let tempMin: Double
-//    let tempMax: Double
     
     enum CodingKeys: String, CodingKey {
         case temp = "temp"
-//        case tempMin = "temp_min"
-//        case tempMax = "temp_max"
     }
     
     init(from decoder: any Decoder) throws {
         let container = try decoder.container(keyedBy: CodingKeys.self)
         self.temp = try container.decode(Double.self, forKey: .temp)
-//        self.tempMin = try container.decode(Double.self, forKey: .tempMin)
-//        self.tempMax = try container.decode(Double.self, forKey: .tempMax)
     }
 }
 
@@ -66,7 +60,7 @@ struct FiveWeatherDescription: Decodable {
     let icon: String
     
     var iconURL: URL? {
-        return URL(string: "https://openweathermap.org/img/wn/\(icon)@2x.png")
+        return URL(string: "https://openweathermap.org/img/wn/\(icon)@4x.png")
     }
     
     enum CodingKeys: CodingKey {

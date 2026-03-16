@@ -45,11 +45,27 @@ final class WeatherListPresenterImpl: WeatherListPresenter {
     func changeFlag(isFavorite: Bool, cityId: Int) {
         interactor.changeFlag(isFavorite: isFavorite, cityId: cityId)
     }
+    
+    func downloadImage(url: WeatherList.WeatherListItem.ImageContainer, indexPath: IndexPath) {
+        interactor.downloadImage(url: url, indexPath: indexPath)
+    }
+    
+//    func downloadImage(url image: URL?, indexPath: IndexPath) {
+//        interactor.downloadImage(url: image, indexPath: indexPath)
+//    }
+    
+    func downloadArray(indexPaths: [IndexPath], models: [WeatherList.WeatherListItem]) {
+        interactor.downloadArray(indexPaths: indexPaths, models: models)
+    }
 }
 
 // MARK: - WeatherListPresenterOutput
 
 extension WeatherListPresenterImpl: WeatherListPresenterOutput {
+    
+    func updateDataSource(with section: [WeatherList.SectionData]) {
+        view?.updateDataSource(with: { section })
+    }
  
     func updateUI(with sections: [WeatherList.SectionData]) {
         view?.updateUI { sections } 

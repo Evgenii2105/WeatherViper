@@ -20,7 +20,7 @@ final class RoundedCurrentBackgroundView: UICollectionReusableView {
     override init(frame: CGRect) {
         super.init(frame: frame)
         addSubview(insetView)
-        
+        insetView.alpha = 0.4
         insetView.addConstraints(constraints: [
             insetView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 8),
             trailingAnchor.constraint(equalTo: insetView.trailingAnchor, constant: 8),

@@ -1,5 +1,5 @@
 //
-//  WeatherListItem.swift
+//  SearchResult.swift
 //  WeatherVIPER
 //
 //  Created by Евгений Фомичев on 12.08.2025.

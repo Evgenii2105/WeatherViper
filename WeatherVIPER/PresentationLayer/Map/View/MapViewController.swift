@@ -142,8 +142,6 @@ extension MapViewController: MapView {
     }
     
     func addPointAnnotation(_ annotation: MKAnnotation) {
-        // mapView.annotations.forEach({ mapView.removeAnnotation($0) })
-        //   annotation.coordinate =
         mapView.addAnnotation(annotation)
     }
 }
@@ -315,28 +313,6 @@ private extension MapViewController {
         menuContainer.isHidden = false
         
         presenter?.getCurrentInfoCity(tappedCoordinate)
-    }
-    
-    func createLayout() -> UICollectionViewLayout {
-        let layout = UICollectionViewCompositionalLayout { sectionIndex, layoutEnvironment in
-            let itemSize = NSCollectionLayoutSize(
-                widthDimension: .absolute(44),
-                heightDimension: .absolute(80)
-            )
-            let item = NSCollectionLayoutItem(layoutSize: itemSize)
-            
-            let groupSize = NSCollectionLayoutSize(
-                widthDimension: .fractionalWidth(1.0),
-                heightDimension: .fractionalHeight(1.0))
-            
-            let group = NSCollectionLayoutGroup.vertical(
-                layoutSize: groupSize,
-                subitems: [item]
-            )
-            let section = NSCollectionLayoutSection(group: group)
-            return section
-        }
-        return layout
     }
     
     @objc

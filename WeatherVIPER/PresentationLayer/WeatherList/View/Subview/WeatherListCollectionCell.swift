@@ -7,6 +7,10 @@
 
 import UIKit
 
+protocol PrefetchImageDelegate: AnyObject {
+    func downloadedImageDelegate()
+}
+
 final class WeatherListCollectionCell: UICollectionViewCell {
     
     // MARK: Constants
@@ -19,14 +23,14 @@ final class WeatherListCollectionCell: UICollectionViewCell {
     // MARK: Internal Properties
     
     static let cellIdentifier = "WeatherListCollectionCell"
-    private static let cache = NSCache<NSURL, UIImage>()
     private var cityId: Int?
+    weak var delegate: PrefetchImageDelegate?
     
     // MARK: Private Properties
     
     private let currentWeatherImage: UIImageView = {
        let currentWeatherImage = UIImageView()
-        currentWeatherImage.contentMode = .scaleAspectFill
+        currentWeatherImage.contentMode = .scaleAspectFit
         currentWeatherImage.clipsToBounds = false
         currentWeatherImage.tintColor = .green
         return currentWeatherImage
@@ -96,7 +100,9 @@ final class WeatherListCollectionCell: UICollectionViewCell {
     }
     
     func configure(city: WeatherList.WeatherListItem) {
+        
         cityId = city.id
+        
         nameLabel.text = city.name
         
         if city.currentTemp > 0 {
@@ -108,34 +114,13 @@ final class WeatherListCollectionCell: UICollectionViewCell {
         maxTemp.text = "H: \(city.maxTemp)°"
         minTemp.text = "L: \(city.minTemp)°"
         precipitationLabel.text = city.precipitation
+        let weatherImage = city.imageContainer
         
-        guard let weatherImageUrl = city.weatherImage else {
-            currentWeatherImage.image = UIImage(
-                systemName: "photo.badge.exclamationmark"
-            )
-            return
-        }
-        
-        if let image = Self.cache.object(forKey: city.weatherImage! as NSURL) {
+        switch weatherImage {
+        case .imageURL:
+            currentWeatherImage.image = nil
+        case .image(let image, _):
             currentWeatherImage.image = image
-        } else {
-            NetworkImpl.downloadImage(from: weatherImageUrl) { [weak self] image in
-                guard let self else { return }
-                
-                DispatchQueue.main.async {
-                    if let downloadedImage = image {
-                        Self.cache.setObject(
-                            downloadedImage,
-                            forKey: weatherImageUrl as NSURL
-                        )
-                        self.currentWeatherImage.image = downloadedImage
-                    } else {
-                        self.currentWeatherImage.image = UIImage(
-                            systemName: "photo.badge.exclamationmark"
-                        )
-                    }
-                }
-            }
         }
     }
 }
@@ -145,7 +130,6 @@ final class WeatherListCollectionCell: UICollectionViewCell {
 private extension WeatherListCollectionCell {
     
     func setupUI() {
-        // contentView.layer
         contentView.backgroundColor = Colors.CitiesWeatherListBackground
         contentView.addSubview(currentWeatherImage)
         contentView.addSubview(nameLabel)
@@ -161,7 +145,7 @@ private extension WeatherListCollectionCell {
             currentWeatherImage.topAnchor.constraint(equalTo: contentView.topAnchor),
             currentWeatherImage.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
             currentWeatherImage.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
-            currentWeatherImage.heightAnchor.constraint(equalToConstant: 100),
+           // currentWeatherImage.heightAnchor.constraint(equalToConstant: 100),
             currentWeatherImage.widthAnchor.constraint(equalToConstant: 100)
         ])
         
@@ -200,3 +184,4 @@ private extension WeatherListCollectionCell {
         ])
     }
 }
+
