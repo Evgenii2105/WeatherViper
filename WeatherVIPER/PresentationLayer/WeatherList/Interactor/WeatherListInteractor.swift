@@ -15,6 +15,5 @@ protocol WeatherListInteractor: AnyObject {
     func remove(at index: Int)
     func searchCities(for query: String)
     func changeFlag(isFavorite: Bool, cityId: Int)
-    func downloadImage(url: WeatherList.WeatherListItem.ImageContainer, indexPath: IndexPath)
-    func downloadArray(indexPaths: [IndexPath], models: [WeatherList.WeatherListItem]) 
+    func downloadImage(for id: Int) 
 }

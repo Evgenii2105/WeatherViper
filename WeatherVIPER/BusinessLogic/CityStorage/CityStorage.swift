@@ -17,6 +17,7 @@ final class CityStorageImpl: CityStorage {
     
     private let userDefaults = UserDefaults.standard
     private let citiesKey = "cities"
+    
     func saveCities(cities: [WeatherList.WeatherListItem]) {
             let citiesData = cities.map { city in
                 var imageData: Data?
@@ -31,7 +32,7 @@ final class CityStorageImpl: CityStorage {
                     imageData = image.pngData()
                 }
                 
-                return [
+                var cityDict = [
                     "id": city.id,
                     "name": city.name,
                     "currentTemp": city.currentTemp,
@@ -39,9 +40,13 @@ final class CityStorageImpl: CityStorage {
                     "minTemp": city.minTemp,
                     "precipitation": city.precipitation,
                     "imageURL": imageURLString,
-                    "imageData": imageData as Any,  // Может быть nil
                     "isFavorites": city.isFavorites
                 ]
+                if let imageData {
+                    cityDict["imageData"] = imageData
+                }
+                
+                return cityDict
             }
             userDefaults.set(citiesData, forKey: self.citiesKey)
         }
@@ -51,29 +56,26 @@ final class CityStorageImpl: CityStorage {
                 return []
             }
             
-            return citiesData.compactMap { dict -> WeatherList.WeatherListItem? in
+            return citiesData.compactMap { dict in
                 guard let id = dict["id"] as? Int,
                       let name = dict["name"] as? String,
                       let currentTemp = dict["currentTemp"] as? Double,
                       let maxTemp = dict["maxTemp"] as? Double,
                       let minTemp = dict["minTemp"] as? Double,
                       let precipitation = dict["precipitation"] as? String,
-                      let isFavorites = dict["isFavorites"] as? Bool else {
+                      let isFavorites = dict["isFavorites"] as? Bool,
+                      let imageURLString = dict["imageURL"] as? String,
+                      let imageURL = URL(string: imageURLString) else {
                     return nil
                 }
                 
-                let imageURLString = dict["imageURL"] as? String ?? ""
                 let imageContainer: WeatherList.WeatherListItem.ImageContainer
                 
                 if let imageData = dict["imageData"] as? Data,
-                   let image = UIImage(data: imageData),
-                   let url = URL(string: imageURLString) {
-                    imageContainer = .image(image: image, url: url)
-                } else if let url = URL(string: imageURLString), !imageURLString.isEmpty {
-                    imageContainer = .imageURL(url: url)
+                   let image = UIImage(data: imageData) {
+                    imageContainer = .image(image: image, url: imageURL)
                 } else {
-                    let image = UIImage(systemName: "photo") ?? UIImage()
-                    imageContainer = .image(image: image, url: URL(string: "about:blank")!)
+                    imageContainer = .imageURL(url: imageURL)
                 }
                 
                 return WeatherList.WeatherListItem(

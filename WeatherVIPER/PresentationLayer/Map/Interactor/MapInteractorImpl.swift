@@ -43,13 +43,11 @@ final class MapInteractorImpl: MapInteractor {
             coordinate: coordinates) { [weak self] result in
                 guard let self else { return }
                 switch result {
-                case .success(let currentCityInfo):
-                    for city in currentCityInfo {
-                        DispatchQueue.main.async {
-                            self.presenter?.didGetInfoCurrentCity(city: city)
-                        }
+                case let .success(item):
+                    DispatchQueue.main.async {
+                        self.presenter?.didGetInfoCurrentCity(city: item)
                     }
-                case .failure(let error):
+                case let .failure(error):
                     print("\(error.localizedDescription)")
                 }
             }

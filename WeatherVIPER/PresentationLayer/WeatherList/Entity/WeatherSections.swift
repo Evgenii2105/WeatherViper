@@ -22,22 +22,26 @@ enum WeatherList {
             case imageURL(url: URL)
             case image(image: UIImage, url: URL)
             
+            var url: URL {
+                switch self {
+                case let .imageURL(url),
+                    let .image(_, url):
+                    return url
+                }
+            }
+            
             func hash(into hasher: inout Hasher) {
                 switch self {
-                case .imageURL(let url):
-                    // hasher.combine(0)
-                    hasher.combine(url)
-                case .image(let image, let url):
-                    // hasher.combine(1)
+                case let .imageURL(url),
+                    let .image(_, url):
                     hasher.combine(url)
                 }
             }
             
             static func ==(lhs: ImageContainer, rhs: ImageContainer) -> Bool {
                 switch (lhs, rhs) {
-                case (.imageURL(let lhsUrl), .imageURL(url: let rhsUrl)):
-                    return lhsUrl == rhsUrl
-                case (.image(_, let lhsUrl), .image(image: _, let rhsUrl)):
+                case let (.imageURL(lhsUrl), .imageURL(rhsUrl)),
+                    let (.image(_, lhsUrl), .image(image: _, rhsUrl)):
                     return lhsUrl == rhsUrl
                 default:
                     return false
@@ -45,7 +49,6 @@ enum WeatherList {
             }
         }
         
-        let ids: String = UUID().uuidString
         let id: Int
         let name: String
         let currentTemp: Double
@@ -56,7 +59,7 @@ enum WeatherList {
         var imageContainer: ImageContainer
         
         func hash(into hasher: inout Hasher) {
-            hasher.combine(ids)
+            // hasher.combine(ids)
             hasher.combine(id)
             hasher.combine(name)
             hasher.combine(currentTemp)
@@ -65,11 +68,11 @@ enum WeatherList {
             hasher.combine(precipitation)
             hasher.combine(isFavorites)
             hasher.combine(imageContainer)
-            print(hasher.finalize())
+            // print(hasher.finalize())
         }
         
         static func ==(lhs: WeatherListItem, rhs: WeatherListItem) -> Bool {
-            return lhs.ids == rhs.ids &&
+            // lhs.ids == rhs.ids &&
             lhs.id == rhs.id &&
             lhs.name == rhs.name &&
             lhs.currentTemp == rhs.currentTemp &&
@@ -100,14 +103,13 @@ extension WeatherResponse {
             precipitation: self.weather.first?.description ?? "",
             isFavorites: false,
             imageContainer: {
-                if let imageUrl = self.weather.first?.iconURL {
-                    return .imageURL(url: imageUrl)
-                } else {
-                    let image = UIImage(systemName: "photo") ?? UIImage()
-                    let url = URL(string: "")!
-                    return .image(image: image, url: url)
+                guard let imageUrl = self.weather.first?.iconURL else {
+                    assertionFailure("Отсутствуют данные о погоде")
+                    // Какой-нибудь плейсхолдерный урл, но лучше добавить отдельный кейс
+                    return .imageURL(url: URL(string: "https://openweathermap.org/img/wn/04n@4x.png")!)
                 }
-            }(),
+                return .imageURL(url: imageUrl)
+            }()
         )
     }
 }

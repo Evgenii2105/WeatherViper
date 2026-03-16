@@ -182,7 +182,7 @@ extension WeatherDetailsViewController: WeatherDetailsView {
     func updateUI(with dataProvider: @escaping () -> [WeatherFiveDaysItem]) {
         let newLayout = makeLayout(with: dataProvider)
         fiveDayWeatherCollection.setCollectionViewLayout(newLayout, animated: true)
-        applySnapShot(weather: dataProvider())
+        applySnapshot(weather: dataProvider())
     }
     
     func didGetWeather(city: WeatherList.WeatherListItem) {
@@ -190,7 +190,7 @@ extension WeatherDetailsViewController: WeatherDetailsView {
     }
     
     func didGetWeatherFiveDays(weather: [WeatherFiveDaysItem]) {
-        applySnapShot(weather: weather)
+        applySnapshot(weather: weather)
     }
 }
 
@@ -429,11 +429,11 @@ private extension WeatherDetailsViewController {
         return layout
     }
     
-    func applySnapShot(weather: [WeatherFiveDaysItem]) {
-        var snapShot = Snapshot()
-        snapShot.appendSections([.section])
-        snapShot.appendItems(weather)
-        dataSource.apply(snapShot, animatingDifferences: true)
+    func applySnapshot(weather: [WeatherFiveDaysItem]) {
+        var snapshot = Snapshot()
+        snapshot.appendSections([.section])
+        snapshot.appendItems(weather)
+        dataSource.apply(snapshot, animatingDifferences: true)
     }
     
     func configure(city: WeatherList.WeatherListItem) {

@@ -7,10 +7,6 @@
 
 import UIKit
 
-protocol PrefetchImageDelegate: AnyObject {
-    func downloadedImageDelegate()
-}
-
 final class WeatherListCollectionCell: UICollectionViewCell {
     
     // MARK: Constants
@@ -24,7 +20,6 @@ final class WeatherListCollectionCell: UICollectionViewCell {
     
     static let cellIdentifier = "WeatherListCollectionCell"
     private var cityId: Int?
-    weak var delegate: PrefetchImageDelegate?
     
     // MARK: Private Properties
     
@@ -118,8 +113,8 @@ final class WeatherListCollectionCell: UICollectionViewCell {
         
         switch weatherImage {
         case .imageURL:
-            currentWeatherImage.image = nil
-        case .image(let image, _):
+            break
+        case let .image(image, _):
             currentWeatherImage.image = image
         }
     }
@@ -145,7 +140,7 @@ private extension WeatherListCollectionCell {
             currentWeatherImage.topAnchor.constraint(equalTo: contentView.topAnchor),
             currentWeatherImage.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
             currentWeatherImage.bottomAnchor.constraint(equalTo: contentView.bottomAnchor),
-           // currentWeatherImage.heightAnchor.constraint(equalToConstant: 100),
+            currentWeatherImage.heightAnchor.constraint(equalToConstant: 80),
             currentWeatherImage.widthAnchor.constraint(equalToConstant: 100)
         ])
         

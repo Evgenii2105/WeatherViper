@@ -20,7 +20,7 @@ final class WeatherListInteractorImpl: WeatherListInteractor {
     weak var presenter: WeatherListPresenterOutput?
     private let router: WeatherListRouter
     private let dataManager: DataManagerService = DataManagerServiceImpl()
-    private var cityWeather: [WeatherList.WeatherListItem] = []
+    private var cachedCities: [WeatherList.WeatherListItem] = []
     private let alertFactory: AlertFactoryService
     private let citiesStorage: CityStorage
     
@@ -33,7 +33,7 @@ final class WeatherListInteractorImpl: WeatherListInteractor {
         self.citiesStorage = citiesStorage
         self.router = router
         
-        self.cityWeather = self.citiesStorage.getCities()
+        self.cachedCities = self.citiesStorage.getCities()
     }
     
     func search(city: String) {
@@ -54,14 +54,12 @@ final class WeatherListInteractorImpl: WeatherListInteractor {
                     )
                 ) { result in
                     switch result {
-                    case .success(let weatherItems):
+                    case let .success(item):
                         DispatchQueue.main.async {
-                            if let newCity = weatherItems.first {
-                                if !self.cityWeather.contains(where: { $0.id == newCity.id }) {
-                                    self.cityWeather.append(newCity)
-                                    self.citiesStorage.saveCities(cities: self.cityWeather)
-                                    self.sendUpdatedDataToPresenter()
-                                }
+                            if !self.cachedCities.contains(where: { $0.id == item.id }) {
+                                self.cachedCities.append(item)
+                                self.citiesStorage.saveCities(cities: self.cachedCities)
+                                self.sendUpdatedDataToPresenter()
                             }
                         }
                     case .failure(let error):
@@ -98,9 +96,9 @@ final class WeatherListInteractorImpl: WeatherListInteractor {
     }
     
     func setupDataSource() {
-        print(cityWeather.count)
+        print(cachedCities.count)
         presenter?.showLoadingIndicator()
-        guard !cityWeather.isEmpty else {
+        guard !cachedCities.isEmpty else {
             self.sendUpdatedDataToPresenter()
             presenter?.hideLoadingIndicator()
             return
@@ -109,7 +107,7 @@ final class WeatherListInteractorImpl: WeatherListInteractor {
         let group = DispatchGroup()
         var updatedItems: [WeatherList.WeatherListItem] = []
         
-        for city in cityWeather {
+        for city in cachedCities {
             group.enter()
             dataManager.getDecoderCoordinate(
                 nameCity: city.name
@@ -126,22 +124,18 @@ final class WeatherListInteractorImpl: WeatherListInteractor {
                         coordinate: coord
                     ) { weatherResult in
                         switch weatherResult {
-                        case .success(let items):
-                            if let item = items.first {
-                                let updatedItem = WeatherList.WeatherListItem(
-                                    id: item.id,
-                                    name: item.name,
-                                    currentTemp: item.currentTemp,
-                                    minTemp: item.minTemp,
-                                    maxTemp: item.maxTemp,
-                                    precipitation: item.precipitation,
-                                  //  weatherImage: item.weatherImage,
-                                    isFavorites: city.isFavorites,
-                                    imageContainer: city.imageContainer,
-                                   // image: city.image
-                                )
-                                updatedItems.append(updatedItem)
-                            }
+                        case let .success(item):
+                            let updatedItem = WeatherList.WeatherListItem(
+                                id: item.id,
+                                name: item.name,
+                                currentTemp: item.currentTemp,
+                                minTemp: item.minTemp,
+                                maxTemp: item.maxTemp,
+                                precipitation: item.precipitation,
+                                isFavorites: city.isFavorites,
+                                imageContainer: city.imageContainer
+                            )
+                            updatedItems.append(updatedItem)
                         case .failure(let error):
                             print("Ошибка получения погоды: \(error.localizedDescription)")
                         }
@@ -162,8 +156,12 @@ final class WeatherListInteractorImpl: WeatherListInteractor {
                 seen.insert(item.id)
                 return true
             }
-            self.cityWeather = merged
-            self.citiesStorage.saveCities(cities: self.cityWeather)
+            self.cachedCities = merged
+            self.citiesStorage.saveCities(cities: self.cachedCities)
+            self.cachedCities.forEach { city in
+                guard case .imageURL = city.imageContainer else { return }
+                self.downloadImage(for: city.id)
+            }
             self.sendUpdatedDataToPresenter()
             self.presenter?.hideLoadingIndicator()
         }
@@ -174,14 +172,14 @@ final class WeatherListInteractorImpl: WeatherListInteractor {
     }
     
     func remove(at index: Int) {
-        self.cityWeather.removeAll(where: { $0.id == index })
-        self.citiesStorage.saveCities(cities: self.cityWeather)
+        self.cachedCities.removeAll(where: { $0.id == index })
+        self.citiesStorage.saveCities(cities: self.cachedCities)
         self.sendUpdatedDataToPresenter()
     }
     
     func changeFlag(isFavorite: Bool, cityId: Int) {
-        if let index = cityWeather.firstIndex(where: { $0.id == cityId }) {
-            let city = cityWeather[index]
+        if let index = cachedCities.firstIndex(where: { $0.id == cityId }) {
+            let city = cachedCities[index]
             
             let updateCity = WeatherList.WeatherListItem(
                 id: city.id,
@@ -195,100 +193,47 @@ final class WeatherListInteractorImpl: WeatherListInteractor {
                 imageContainer: city.imageContainer,
                // image: city.image
             )
-            cityWeather[index] = updateCity
-            citiesStorage.saveCities(cities: cityWeather)
+            cachedCities[index] = updateCity
+            citiesStorage.saveCities(cities: cachedCities)
             sendUpdatedDataToPresenter()
         }
     }
     
-    func downloadImage(url: WeatherList.WeatherListItem.ImageContainer, indexPath: IndexPath) {
-        switch url {
-        case .imageURL(let url):
-            if let cachedImage = Self.cache.object(forKey: url as NSURL) {
-                self.updateCityImage(image: cachedImage, indexPath: indexPath)
+    func downloadImage(for id: Int) {
+        guard let index = cachedCities.firstIndex(where: { $0.id == id}),
+              case let .imageURL(url) = cachedCities[index].imageContainer else {
+            assertionFailure("Картинка уже загружена")
+            return
+        }
+        
+        dataManager.loadImage(
+            from: url
+        ) { [weak self] downloadedImage in
+            guard let self else { return }
+            guard let downloadedImage else {
+                print("не получилось загрузить картинку из бека")
                 return
             }
-        case .image(let image, let url):
-            dataManager.loadImage(
-                from: url
-            ) { [weak self] image in
-                guard let self else { return }
-                if let downloadedImage = image {
-                    Self.cache.setObject(downloadedImage, forKey: url as NSURL)
-                    self.updateCityImage(image: downloadedImage, indexPath: indexPath)
-                } else {
-                    print("не получилось загрузить картинку из бека")
-                    self.updateCityImage(image: UIImage(systemName: "photo"), indexPath: indexPath)
-                }
-            }
-        }
-        print("картинки в кеше нет, идем в дата манагер")
-    }
-    
-    func downloadArray(indexPaths: [IndexPath], models: [WeatherList.WeatherListItem]) {
-        let group = DispatchGroup()
-        var images: [IndexPath: UIImage?] = [:]
-        for indexPath in indexPaths {
-            group.enter()
-            let item = models[indexPath.row].imageContainer
-            switch item {
-            case .image(image: _, url: let url):
-                dataManager.loadImage(from: url, completion: { result in
-                    images[indexPath] = result
-                    group.leave()
-                })
-            case .imageURL(url: let url):
-                dataManager.loadImage(from: url, completion: { result in
-                    images[indexPath] = result
-                    group.leave()
-                })
-            }
-            group.notify(queue: .main) {
-                for (key, value) in images {
-                    self.updateCityImage(image: value, indexPath: key)
-                }
-            }
-            
+            Self.cache.setObject(downloadedImage, forKey: url as NSURL)
+            self.updateImage(downloadedImage, at: index)
         }
     }
-    
 }
 
 // MARK: - WeatherListInteractorImpl
 
 private extension WeatherListInteractorImpl {
     
-    func updateCityImage(image: UIImage?, indexPath: IndexPath) {
-        let sections = distributeCitiesIntoSections()
+    func updateImage(_ image: UIImage, at index: Int) {
+        var updatedCity = cachedCities[index]
+        updatedCity.imageContainer = .image(image: image, url: updatedCity.imageContainer.url)
         
-        guard indexPath.section < sections.count,
-                indexPath.item < sections[indexPath.section].items.count else {
-              return
-          }
-        let updatedItem = sections[indexPath.section].items[indexPath.item]
-        if let index = cityWeather.firstIndex(where: { $0.id == updatedItem.id }) {
-            var updatedCity = cityWeather[index]
-
-            // Preserve existing URL if available when switching to an image-based container
-            let existingURL: URL? = {
-                if case .imageURL(let url) = updatedCity.imageContainer {
-                    return url
-                }
-                if case .image(_, let url) = updatedCity.imageContainer {
-                    return url
-                }
-                return nil
-            }()
-
-            let urlToKeep = existingURL ?? URL(string: "about:blank")!
-            updatedCity.imageContainer = .image(image: image!, url: urlToKeep)
-
-            cityWeather[index] = updatedCity
-            citiesStorage.saveCities(cities: cityWeather)
-            
-            DispatchQueue.main.async {
-                self.presenter?.updateDataSource(with: sections)
-            }
+        cachedCities[index] = updatedCity
+        citiesStorage.saveCities(cities: cachedCities)
+        
+        let sections = distributeCitiesIntoSections()
+        DispatchQueue.main.async {
+            self.presenter?.updateDataSource(with: sections)
         }
     }
 
@@ -300,7 +245,7 @@ private extension WeatherListInteractorImpl {
      func distributeCitiesIntoSections() -> [WeatherList.SectionData] {
         var sections: [WeatherList.SectionData] = []
          
-        if let currentCity = cityWeather.first(where: { $0.name == "Краснодар" }) {
+        if let currentCity = cachedCities.first(where: { $0.name == "Краснодар" }) {
             sections.append(
                 .init(
                     section: .current,
@@ -309,7 +254,7 @@ private extension WeatherListInteractorImpl {
             )
         }
         
-        let favourites = cityWeather.filter({ $0.isFavorites })
+        let favourites = cachedCities.filter({ $0.isFavorites })
         if !favourites.isEmpty {
             sections.append(
                 .init(
@@ -319,7 +264,7 @@ private extension WeatherListInteractorImpl {
             )
         }
         
-        let positive = cityWeather.filter{
+        let positive = cachedCities.filter{
             $0.currentTemp > 0 &&
             !$0.isFavorites &&
             $0.name != "Краснодар"
@@ -333,7 +278,7 @@ private extension WeatherListInteractorImpl {
             )
         }
         
-        let negative = cityWeather.filter{
+        let negative = cachedCities.filter{
             $0.currentTemp <= 0 &&
             !$0.isFavorites &&
             $0.name != "Краснодар"
@@ -361,13 +306,11 @@ extension WeatherListInteractorImpl: MapListener {
             DispatchQueue.main.async {
                 guard let self else { return }
                 switch result {
-                case .success(let weatherCity):
-                    for newCity in weatherCity {
-                        if !self.cityWeather.contains(where: { $0.id == newCity.id }) {
-                            self.cityWeather.append(newCity)
-                        }
+                case let .success(item):
+                    if !self.cachedCities.contains(where: { $0.id == item.id }) {
+                        self.cachedCities.append(item)
                     }
-                    self.citiesStorage.saveCities(cities: self.cityWeather)
+                    self.citiesStorage.saveCities(cities: self.cachedCities)
                     self.sendUpdatedDataToPresenter()
                 case .failure:
                     let alert = self.alertFactory.showNetworkError(

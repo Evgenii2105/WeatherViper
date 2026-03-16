@@ -22,16 +22,15 @@ class WeatherListViewController: UIViewController {
         let data = DataSource(
             collectionView: cityListCollection
         ) { collectionView, indexPath, itemIdentifier in
-                guard let cell = collectionView.dequeueReusableCell(
-                    withReuseIdentifier: WeatherListCollectionCell.cellIdentifier,
-                    for: indexPath
-                ) as? WeatherListCollectionCell else {
-                    return UICollectionViewCell()
-                }
-                
-                cell.configure(city: itemIdentifier)
-                return cell
+            guard let cell = collectionView.dequeueReusableCell(
+                withReuseIdentifier: WeatherListCollectionCell.cellIdentifier,
+                for: indexPath
+            ) as? WeatherListCollectionCell else {
+                return UICollectionViewCell()
             }
+            cell.configure(city: itemIdentifier)
+            return cell
+        }
         
         data.supplementaryViewProvider = { collectionView, kind, indexPath in
             guard kind == UICollectionView.elementKindSectionHeader else { return nil }
@@ -291,8 +290,6 @@ private extension WeatherListViewController {
                 trailing: 8
             )
             
-            // section = NSCollectionLayoutSection.
-            
             let backgroundDecorationsCurrent = NSCollectionLayoutDecorationItem.background(
                 elementKind: RoundedCurrentBackgroundView.reuseIdentifier
             )
@@ -351,16 +348,16 @@ private extension WeatherListViewController {
         return layout
     }
     
-    func applySnapShot(sections: [WeatherList.SectionData]) {
-        var snapShot = Snapshot()
+    func applySnapshot(sections: [WeatherList.SectionData]) {
+        var snapshot = Snapshot()
         
         for sectionData in sections {
             if !sectionData.items.isEmpty {
-                snapShot.appendSections([sectionData.section])
-                snapShot.appendItems(sectionData.items, toSection: sectionData.section)
+                snapshot.appendSections([sectionData.section])
+                snapshot.appendItems(sectionData.items, toSection: sectionData.section)
             }
         }
-        dataSource.apply(snapShot, animatingDifferences: true)
+        dataSource.apply(snapshot, animatingDifferences: true)
     }
 }
 
@@ -395,7 +392,7 @@ extension WeatherListViewController: SearchResultsViewControllerDelegate {
 extension WeatherListViewController: WeatherListView {
     
     func updateDataSource(with dataProvider: @escaping () -> [WeatherList.SectionData]) {
-        applySnapShot(sections: dataProvider())
+        applySnapshot(sections: dataProvider())
     }
 
     func updateUI(
@@ -403,7 +400,7 @@ extension WeatherListViewController: WeatherListView {
     ) {
         let newLayout = makeLayout(with: dataProvider)
         cityListCollection.setCollectionViewLayout(newLayout, animated: true)
-        applySnapShot(sections: dataProvider())
+        applySnapshot(sections: dataProvider())
     }
     
     func didUpdateSearchResults(
@@ -432,10 +429,9 @@ extension WeatherListViewController: UICollectionViewDataSourcePrefetching {
         prefetchItemsAt indexPaths: [IndexPath]
     ) {
         for indexPath in indexPaths {
-            let model = dataSource.snapshot().itemIdentifiers[indexPath.item]
-           // print("image: \(model.weatherImage), indexPathSection: \(indexPath.section), indexPathItem: \(indexPath.item) ")
-          presenter?.downloadImage(url: model.imageContainer, indexPath: indexPath)
-            //presenter?.downloadArray(indexPaths: indexPaths, models: dataSource.snapshot().itemIdentifiers)
+            guard let model = dataSource.itemIdentifier(for: indexPath),
+                  case .imageURL = model.imageContainer else { continue }
+            presenter?.downloadImage(for: model.id)
         }
     }
     
@@ -447,14 +443,5 @@ extension WeatherListViewController: UICollectionViewDataSourcePrefetching {
             let model = dataSource.snapshot().itemIdentifiers[indexPath.item]
            // print("cancel: \(model)")
         }
-    }
-}
-
-// MARK: - PrefetchImageDelegate
-
-extension WeatherListViewController: PrefetchImageDelegate {
-    
-    func downloadedImageDelegate() {
-       // presenter?.downloadImage(url: <#T##URL?#>, indexPath: <#T##IndexPath#>)
     }
 }

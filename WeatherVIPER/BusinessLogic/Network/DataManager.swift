@@ -12,7 +12,7 @@ protocol DataManagerService: AnyObject {
     func getCurrentCity(
         coordinate: CLLocationCoordinate2D,
         weatherCityResult: @escaping (
-            Result<[WeatherList.WeatherListItem], NetworkError>
+            Result<WeatherList.WeatherListItem, NetworkError>
         ) -> Void
     )
     func getDecoderCoordinate(
@@ -40,7 +40,7 @@ final class DataManagerServiceImpl: DataManagerService {
     func getCurrentCity(
         coordinate: CLLocationCoordinate2D,
         weatherCityResult: @escaping (
-            Result<[WeatherList.WeatherListItem], NetworkError>
+            Result<WeatherList.WeatherListItem, NetworkError>
         ) -> Void
     ) {
         client.request(
@@ -52,7 +52,7 @@ final class DataManagerServiceImpl: DataManagerService {
         ) { (result: Result<WeatherResponse, NetworkError>) in
             switch result {
             case .success(let wetherResponse):
-                weatherCityResult(.success([wetherResponse.mapToItem()]))
+                weatherCityResult(.success(wetherResponse.mapToItem()))
             case .failure(let error):
                 weatherCityResult(.failure(NetworkError.decodingFailed(error)))
             }
